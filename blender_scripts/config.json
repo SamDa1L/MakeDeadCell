@@ -1,0 +1,59 @@
+{
+    "fbx_path": "F:\\UnityTestProjects\\ArtAssests\\人物\\测试2\\Animation Library[Standard]\\Unity\\AnimationLibrary_Unity_Standard.fbx",
+    "output_path": "F:\\UnityTestProjects\\MakeDeadCell\\renders",
+    "character_name": "DeadCellsCharacter",
+    "render_settings": {
+        "resolution": [
+            256,
+            256
+        ],
+        "frame_rate": 12
+    },
+    "dead_cells_colors": {
+        "skin": [
+            0.8,
+            0.6,
+            0.4,
+            1.0
+        ],
+        "cloth": [
+            0.2,
+            0.3,
+            0.6,
+            1.0
+        ],
+        "metal": [
+            0.5,
+            0.5,
+            0.5,
+            1.0
+        ],
+        "accent": [
+            0.8,
+            0.2,
+            0.2,
+            1.0
+        ]
+    },
+    "toon_material_settings": {
+        "use_hard_shadows": true,
+        "color_steps": 4,
+        "rim_light_strength": 0.3,
+        "shadow_strength": 0.7
+    },
+    "automation": {
+        "auto_render": true,
+        "render_limit": 5,
+        "skip_confirmation": true
+    },
+    "camera_settings": {
+        "auto_adjust": true,
+        "margin_ratio": 0.15,
+        "min_ortho_scale": 0.5,
+        "max_ortho_scale": 15.0,
+        "per_animation_adjustment": true,
+        "clip_start": 0.01,
+        "clip_end_multiplier": 10.0,
+        "min_clip_end": 100.0
+    }
+}

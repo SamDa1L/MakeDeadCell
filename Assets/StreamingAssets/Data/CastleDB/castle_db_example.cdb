@@ -1,0 +1,281 @@
+{
+	"sheets": [
+		{
+			"name": "weapons",
+			"columns": [
+				{
+					"typeStr": "0",
+					"name": "id"
+				},
+				{
+					"typeStr": "1",
+					"name": "name"
+				},
+				{
+					"typeStr": "1",
+					"name": "description"
+				},
+				{
+					"typeStr": "1",
+					"name": "weaponType"
+				},
+				{
+					"typeStr": "2",
+					"name": "baseDamage"
+				},
+				{
+					"typeStr": "2",
+					"name": "attackSpeed"
+				},
+				{
+					"typeStr": "2",
+					"name": "range"
+				},
+				{
+					"typeStr": "2",
+					"name": "critChance"
+				},
+				{
+					"typeStr": "2",
+					"name": "critMultiplier"
+				},
+				{
+					"typeStr": "1",
+					"name": "damageType"
+				},
+				{
+					"typeStr": "1",
+					"name": "iconPath"
+				},
+				{
+					"typeStr": "1",
+					"name": "prefabPath"
+				}
+			],
+			"lines": [
+				{
+					"id": "basic_sword",
+					"name": "Basic Sword",
+					"description": "A simple iron sword. Reliable and balanced.",
+					"weaponType": "Melee",
+					"baseDamage": 15,
+					"attackSpeed": 1.2,
+					"range": 2,
+					"critChance": 0.05,
+					"critMultiplier": 2,
+					"damageType": "Physical",
+					"iconPath": "Icons/Weapons/basic_sword",
+					"prefabPath": "Weapons/BasicSword"
+				},
+				{
+					"id": "fire_bow",
+					"name": "Fire Bow",
+					"description": "A magical bow that shoots flaming arrows.",
+					"weaponType": "Ranged",
+					"baseDamage": 12,
+					"attackSpeed": 0.8,
+					"range": 15,
+					"critChance": 0.08,
+					"critMultiplier": 2.5,
+					"damageType": "Fire",
+					"iconPath": "Icons/Weapons/fire_bow",
+					"prefabPath": "Weapons/FireBow"
+				}
+			],
+			"separators": [],
+			"props": {}
+		},
+		{
+			"name": "enemies",
+			"columns": [
+				{
+					"typeStr": "0",
+					"name": "id"
+				},
+				{
+					"typeStr": "1",
+					"name": "name"
+				},
+				{
+					"typeStr": "1",
+					"name": "description"
+				},
+				{
+					"typeStr": "2",
+					"name": "maxHealth"
+				},
+				{
+					"typeStr": "2",
+					"name": "moveSpeed"
+				},
+				{
+					"typeStr": "2",
+					"name": "attackDamage"
+				},
+				{
+					"typeStr": "2",
+					"name": "detectionRange"
+				},
+				{
+					"typeStr": "2",
+					"name": "attackRange"
+				},
+				{
+					"typeStr": "2",
+					"name": "attackCooldown"
+				},
+				{
+					"typeStr": "1",
+					"name": "aiType"
+				},
+				{
+					"typeStr": "1",
+					"name": "prefabPath"
+				}
+			],
+			"lines": [
+				{
+					"id": "zombie",
+					"name": "Zombie",
+					"description": "Slow but persistent undead creature.",
+					"maxHealth": 30,
+					"moveSpeed": 2,
+					"attackDamage": 8,
+					"detectionRange": 6,
+					"attackRange": 1.5,
+					"attackCooldown": 2,
+					"aiType": "Basic",
+					"prefabPath": "Enemies/Zombie"
+				},
+				{
+					"id": "skeleton_archer",
+					"name": "Skeleton Archer",
+					"description": "Ranged enemy that keeps its distance.",
+					"maxHealth": 20,
+					"moveSpeed": 3,
+					"attackDamage": 10,
+					"detectionRange": 10,
+					"attackRange": 8,
+					"attackCooldown": 1.5,
+					"aiType": "Ranged",
+					"prefabPath": "Enemies/SkeletonArcher"
+				}
+			],
+			"separators": [],
+			"props": {}
+		},
+		{
+			"name": "items",
+			"columns": [
+				{
+					"typeStr": "0",
+					"name": "id"
+				},
+				{
+					"typeStr": "1",
+					"name": "name"
+				},
+				{
+					"typeStr": "1",
+					"name": "description"
+				},
+				{
+					"typeStr": "1",
+					"name": "itemType"
+				},
+				{
+					"typeStr": "1",
+					"name": "rarity"
+				},
+				{
+					"typeStr": "3",
+					"name": "value"
+				},
+				{
+					"typeStr": "1",
+					"name": "iconPath"
+				},
+				{
+					"typeStr": "1",
+					"name": "prefabPath"
+				}
+			],
+			"lines": [
+				{
+					"id": "health_potion",
+					"name": "Health Potion",
+					"description": "Restores 50 health points.",
+					"itemType": "Consumable",
+					"rarity": "Common",
+					"value": 25,
+					"iconPath": "Icons/Items/health_potion",
+					"prefabPath": "Items/HealthPotion"
+				},
+				{
+					"id": "strength_gem",
+					"name": "Strength Gem",
+					"description": "Increases attack damage by 10%.",
+					"itemType": "Equipment",
+					"rarity": "Rare",
+					"value": 100,
+					"iconPath": "Icons/Items/strength_gem",
+					"prefabPath": "Items/StrengthGem"
+				}
+			],
+			"separators": [],
+			"props": {}
+		},
+		{
+			"name": "rooms",
+			"columns": [
+				{
+					"typeStr": "0",
+					"name": "id"
+				},
+				{
+					"typeStr": "1",
+					"name": "name"
+				},
+				{
+					"typeStr": "1",
+					"name": "roomType"
+				},
+				{
+					"typeStr": "1",
+					"name": "ldtkLevelPath"
+				},
+				{
+					"typeStr": "3",
+					"name": "difficulty"
+				}
+			],
+			"lines": [
+				{
+					"id": "Level_0",
+					"name": "Starting Room",
+					"roomType": "Combat",
+					"ldtkLevelPath": "Level_0",
+					"difficulty": 1
+				},
+				{
+					"id": "Level_1",
+					"name": "Prison Cell",
+					"roomType": "Combat",
+					"ldtkLevelPath": "Level_1",
+					"difficulty": 2
+				},
+				{
+					"id": "Boss_Room",
+					"name": "Boss Chamber",
+					"roomType": "Boss",
+					"ldtkLevelPath": "Boss_Room",
+					"difficulty": 5
+				}
+			],
+			"separators": [],
+			"props": {}
+		}
+	],
+	"customTypes": [],
+	"compress": false
+}

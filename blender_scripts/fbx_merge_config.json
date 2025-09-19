@@ -1,0 +1,32 @@
+{
+    "model_path": "F:\\UnityTestProjects\\ArtAssests\\人物\\测试3\\Meshes\\HumanM_Model.fbx",
+    "animation_path": "F:\\UnityTestProjects\\ArtAssests\\人物\\测试3\\Animations\\Male\\Idles\\HumanM@Idle01-Idle02.fbx",
+    "output_path": "F:\\UnityTestProjects\\MakeDeadCell\\merged_output",
+    "output_filename": "HumanM_Merged.fbx",
+    "settings": {
+        "clear_scene_before_import": true,
+        "preserve_original_actions": false,
+        "auto_rename_merged_actions": true,
+        "bone_matching_mode": "exact",
+        "export_scale": 1.0,
+        "bake_animations": true
+    },
+    "fbx_import_settings": {
+        "global_scale": 1.0,
+        "use_manual_orientation": true,
+        "bake_space_transform": false,
+        "primary_bone_axis": "Y",
+        "secondary_bone_axis": "X"
+    },
+    "fbx_export_settings": {
+        "global_scale": 1.0,
+        "apply_scale_options": "FBX_SCALE_NONE",
+        "add_leaf_bones": false,
+        "bake_anim": true,
+        "bake_anim_use_all_bones": true,
+        "bake_anim_use_nla_strips": true,
+        "bake_anim_use_all_actions": true,
+        "bake_anim_step": 1.0,
+        "bake_anim_simplify_factor": 1.0
+    }
+}
