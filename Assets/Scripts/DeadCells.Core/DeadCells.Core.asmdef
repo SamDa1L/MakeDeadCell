@@ -1,0 +1,17 @@
+{
+    "name": "DeadCells.Core",
+    "rootNamespace": "DeadCells.Core",
+    "references": [
+        "Unity.TextMeshPro",
+        "Unity.Newtonsoft.Json"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

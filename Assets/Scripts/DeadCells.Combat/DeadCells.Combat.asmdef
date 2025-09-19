@@ -1,0 +1,16 @@
+{
+    "name": "DeadCells.Combat",
+    "rootNamespace": "DeadCells.Combat",
+    "references": [
+        "DeadCells.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
