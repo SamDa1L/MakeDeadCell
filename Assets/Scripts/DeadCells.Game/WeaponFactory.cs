@@ -1,7 +1,10 @@
 using UnityEngine;
+using DeadCells.Core;
+using DeadCells.Player;
 using DeadCells.Combat;
+using DeadCells.Rooms;
 
-namespace DeadCells.Core
+namespace DeadCells.Game
 {
     public class WeaponFactory : MonoBehaviour
     {

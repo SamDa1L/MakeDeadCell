@@ -1,0 +1,19 @@
+{
+    "name": "DeadCells.Game",
+    "rootNamespace": "DeadCells.Game",
+    "references": [
+        "DeadCells.Core",
+        "DeadCells.Player",
+        "DeadCells.Combat",
+        "DeadCells.Rooms"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

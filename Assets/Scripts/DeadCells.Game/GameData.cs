@@ -1,8 +1,10 @@
 using UnityEngine;
 using System;
+using DeadCells.Player;
 using DeadCells.Combat;
+using DeadCells.Rooms;
 
-namespace DeadCells.Core
+namespace DeadCells.Game
 {
     [Serializable]
     public class WeaponData

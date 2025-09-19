@@ -1,7 +1,9 @@
 using UnityEngine;
+using DeadCells.Player;
 using DeadCells.Combat;
+using DeadCells.Rooms;
 
-namespace DeadCells.Core
+namespace DeadCells.Game
 {
     /// <summary>
     /// Data component that provides weapon statistics from CastleDB

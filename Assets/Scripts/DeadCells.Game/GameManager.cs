@@ -1,9 +1,10 @@
 using UnityEngine;
+using DeadCells.Core;
 using DeadCells.Player;
 using DeadCells.Rooms;
 using DeadCells.Combat;
 
-namespace DeadCells.Core
+namespace DeadCells.Game
 {
     /// <summary>
     /// 游戏管理器 - 整个游戏框架的核心管理类
