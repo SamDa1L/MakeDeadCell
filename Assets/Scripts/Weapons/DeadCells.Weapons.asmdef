@@ -2,8 +2,8 @@
     "name": "DeadCells.Weapons",
     "rootNamespace": "DeadCells.Weapons",
     "references": [
-        "DeadCells.Core",
         "DeadCells.Combat",
+        "DeadCells.Data",
         "Unity.TextMeshPro"
     ],
     "includePlatforms": [],

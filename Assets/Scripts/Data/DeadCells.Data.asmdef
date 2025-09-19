@@ -2,7 +2,6 @@
     "name": "DeadCells.Data",
     "rootNamespace": "DeadCells.Data",
     "references": [
-        "DeadCells.Core",
         "Unity.TextMeshPro",
         "Unity.Newtonsoft.Json"
     ],

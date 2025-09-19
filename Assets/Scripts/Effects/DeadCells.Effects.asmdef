@@ -2,7 +2,6 @@
     "name": "DeadCells.Effects",
     "rootNamespace": "DeadCells.Effects",
     "references": [
-        "DeadCells.Core",
         "Unity.TextMeshPro",
         "Unity.RenderPipelines.Universal.Runtime"
     ],

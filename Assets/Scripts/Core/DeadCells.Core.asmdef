@@ -2,6 +2,11 @@
     "name": "DeadCells.Core",
     "rootNamespace": "DeadCells.Core",
     "references": [
+        "DeadCells.Data",
+        "DeadCells.Player",
+        "DeadCells.Combat",
+        "DeadCells.Rooms",
+        "DeadCells.Weapons",
         "Unity.TextMeshPro",
         "Unity.Timeline",
         "Unity.RenderPipelines.Universal.Runtime"

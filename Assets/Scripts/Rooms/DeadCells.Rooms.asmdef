@@ -2,7 +2,6 @@
     "name": "DeadCells.Rooms",
     "rootNamespace": "DeadCells.Rooms",
     "references": [
-        "DeadCells.Core",
         "LDtkUnity.Runtime",
         "Unity.TextMeshPro"
     ],
