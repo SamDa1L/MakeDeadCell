@@ -6,8 +6,15 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
 jobs:
   test:
@@ -50,8 +57,8 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          unity-version: ${{ matrix.unity-version }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          unityVersion: ${{ matrix.unity-version }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
 
       # Upload test results
       - name: Upload Test Results
@@ -59,7 +66,10 @@ jobs:
         if: always()
         with:
           name: Test results (${{ matrix.target-platform }})
-          path: artifacts
+          path: |
+            artifacts/
+            /tmp/artifacts/
+          if-no-files-found: warn
 
   build:
     name: Build Unity Project
@@ -102,18 +112,19 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          unity-version: ${{ matrix.unity-version }}
-          target-platform: ${{ matrix.target-platform }}
-          build-name: DeadCellsTestFramework
-          builds-path: builds
+          unityVersion: ${{ matrix.unity-version }}
+          targetPlatform: ${{ matrix.target-platform }}
+          buildName: DeadCellsTestFramework
+          buildsPath: builds
 
       # Upload build artifacts
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Build (${{ matrix.target-platform }})
-          path: builds
+          path: builds/
           retention-days: 7
+          if-no-files-found: warn
 
   code-quality:
     name: Code Quality Checks
