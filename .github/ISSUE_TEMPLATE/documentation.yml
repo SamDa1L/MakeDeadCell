@@ -1,0 +1,109 @@
+name: 📚 Documentation Issue
+description: Report an issue with documentation or request documentation improvements
+title: "[Docs]: "
+labels: ["documentation", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve our documentation! Clear documentation is essential for the project's success.
+
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: Documentation Type
+      description: What type of documentation issue is this?
+      options:
+        - Missing documentation
+        - Incorrect/outdated information
+        - Unclear instructions
+        - Typo/grammar error
+        - Code example doesn't work
+        - Documentation structure improvement
+        - New documentation request
+    validations:
+      required: true
+
+  - type: dropdown
+    id: doc-location
+    attributes:
+      label: Documentation Location
+      description: Where is the documentation issue located?
+      options:
+        - README.md
+        - ARCHITECTURE.md
+        - API_REFERENCE.md
+        - Setup/Installation guide
+        - LDtk Integration docs
+        - Code comments
+        - GitHub Wiki
+        - Other (specify below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: Issue Description
+      description: Describe the documentation issue in detail
+      placeholder: |
+        What's wrong with the current documentation?
+        What information is missing or incorrect?
+        What confused you while reading it?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-improvement
+    attributes:
+      label: Suggested Improvement
+      description: How would you improve this documentation?
+      placeholder: |
+        What should be added, changed, or removed?
+        How could the explanation be clearer?
+        Any specific examples that would help?
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-content
+    attributes:
+      label: Current Content (if applicable)
+      description: Copy the current text that needs to be updated
+      placeholder: Paste the current documentation text here...
+      render: markdown
+
+  - type: textarea
+    id: proposed-content
+    attributes:
+      label: Proposed Content (if applicable)
+      description: Provide your suggested replacement text
+      placeholder: Write your improved version here...
+      render: markdown
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Target Audience
+      description: Who is the primary audience for this documentation?
+      options:
+        - New developers getting started
+        - Experienced Unity developers
+        - Game designers/non-programmers
+        - Contributors to the project
+        - All users
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context about this documentation issue
+      placeholder: |
+        - Screenshots of confusing sections
+        - Links to related documentation
+        - Examples from other projects
+        - Your experience level with Unity/the framework

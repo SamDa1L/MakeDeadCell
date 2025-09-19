@@ -39,7 +39,7 @@
 	"levelNamePattern": "Level_%idx",
 	"tutorialDesc": null,
 	"customCommands": [{
-		"command": "../../../Library/LDtkTilesetExporter/ExportTilesetDefinition.exe \"LDtkLevelTest\"",
+		"command": "bash \"../../../Library/LDtkTilesetExporter/export_tileset_universal.sh\" \"LDtkLevelTest\"",
 		"when": "AfterSave"
 	}],
 	"flags": [],

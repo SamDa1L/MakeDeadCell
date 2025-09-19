@@ -1,0 +1,135 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement for the Dead Cells Test Framework
+title: "[Feature]: "
+labels: ["enhancement", "needs-discussion"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please provide as much detail as possible to help us understand your request.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm you have completed these steps before submitting
+      options:
+        - label: I have searched existing issues to ensure this feature hasn't been requested before
+          required: true
+        - label: I have checked the project roadmap and documentation
+          required: true
+        - label: This feature request is related to the Dead Cells Test Framework scope
+          required: true
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What type of feature are you requesting?
+      options:
+        - New gameplay mechanic
+        - Developer tool/utility
+        - Performance improvement
+        - Documentation enhancement
+        - Build/deployment improvement
+        - API/framework enhancement
+        - Cross-platform improvement
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Description
+      description: Is your feature request related to a problem? Please describe.
+      placeholder: A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like
+      placeholder: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Describe alternatives you've considered
+      placeholder: A clear and concise description of any alternative solutions or features you've considered.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Target Component
+      description: Which part of the framework would this feature affect?
+      options:
+        - Player Controller
+        - Combat System
+        - Room/Level Management
+        - LDtk Integration
+        - Data-Driven Systems (CastleDB)
+        - Animation System
+        - Effects System
+        - Build/Setup Tools
+        - Developer Experience
+        - Documentation
+        - Cross-platform Support
+        - Performance
+        - New Component/System
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How important is this feature to you?
+      options:
+        - Nice to have
+        - Would be helpful
+        - Important for my project
+        - Critical/blocking
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Describe your specific use case for this feature
+      placeholder: |
+        How would you use this feature?
+        What problem does it solve for you?
+        Who would benefit from this feature?
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation Ideas
+      description: Do you have any ideas about how this feature could be implemented?
+      placeholder: |
+        If you have technical knowledge, share your thoughts on:
+        - How this could be implemented
+        - Any potential challenges
+        - Integration points with existing systems
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context, mockups, or examples about the feature request here
+      placeholder: |
+        Any additional information that would help understand the feature:
+        - Screenshots or mockups
+        - Links to similar implementations
+        - References to other games/frameworks

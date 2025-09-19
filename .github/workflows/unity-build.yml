@@ -1,0 +1,190 @@
+name: Unity Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+jobs:
+  test:
+    name: Test Unity Project
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        unity-version:
+          - 2022.3.21f1
+        target-platform:
+          - StandaloneWindows64
+          - StandaloneLinux64
+          - StandaloneOSX
+
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      # Cache Unity Library folder
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ matrix.target-platform }}-${{ matrix.unity-version }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-${{ matrix.target-platform }}-${{ matrix.unity-version }}-
+            Library-${{ matrix.target-platform }}-
+            Library-
+
+      # Run Unity tests
+      - name: Run Unity Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unity-version: ${{ matrix.unity-version }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Upload test results
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Test results (${{ matrix.target-platform }})
+          path: artifacts
+
+  build:
+    name: Build Unity Project
+    runs-on: ubuntu-latest
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        unity-version:
+          - 2022.3.21f1
+        target-platform:
+          - StandaloneWindows64
+          - StandaloneLinux64
+          - StandaloneOSX
+
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      # Cache Unity Library folder
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ matrix.target-platform }}-${{ matrix.unity-version }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-${{ matrix.target-platform }}-${{ matrix.unity-version }}-
+            Library-${{ matrix.target-platform }}-
+            Library-
+
+      # Build Unity project
+      - name: Build Unity Project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unity-version: ${{ matrix.unity-version }}
+          target-platform: ${{ matrix.target-platform }}
+          build-name: DeadCellsTestFramework
+          builds-path: builds
+
+      # Upload build artifacts
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build (${{ matrix.target-platform }})
+          path: builds
+          retention-days: 7
+
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Check for common Unity issues
+      - name: Check Unity Project Structure
+        run: |
+          echo "Checking Unity project structure..."
+          
+          # Check if essential folders exist
+          if [ ! -d "Assets" ]; then
+            echo "❌ Assets folder not found"
+            exit 1
+          fi
+          
+          if [ ! -d "ProjectSettings" ]; then
+            echo "❌ ProjectSettings folder not found"
+            exit 1
+          fi
+          
+          if [ ! -f "ProjectSettings/ProjectVersion.txt" ]; then
+            echo "❌ ProjectVersion.txt not found"
+            exit 1
+          fi
+          
+          echo "✅ Unity project structure is valid"
+
+      # Check for LDtk setup
+      - name: Validate LDtk Integration
+        run: |
+          echo "Checking LDtk integration..."
+          
+          if [ ! -f "Assets/Data/LDtkLevel/LDtkLevelTest.ldtk" ]; then
+            echo "❌ LDtk level file not found"
+            exit 1
+          fi
+          
+          if [ ! -d "Library/LDtkTilesetExporter" ]; then
+            echo "❌ LDtk exporter not found"
+            exit 1
+          fi
+          
+          if [ ! -f "Library/LDtkTilesetExporter/export_tileset_universal.sh" ]; then
+            echo "❌ Cross-platform export script not found"
+            exit 1
+          fi
+          
+          echo "✅ LDtk integration is properly configured"
+
+      # Check for documentation
+      - name: Validate Documentation
+        run: |
+          echo "Checking documentation..."
+          
+          if [ ! -f "README.md" ]; then
+            echo "❌ README.md not found"
+            exit 1
+          fi
+          
+          if [ ! -f "LICENSE" ]; then
+            echo "❌ LICENSE file not found"
+            exit 1
+          fi
+          
+          if [ ! -f "CONTRIBUTING.md" ]; then
+            echo "⚠️  CONTRIBUTING.md not found (recommended)"
+          fi
+          
+          echo "✅ Documentation check completed"

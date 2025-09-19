@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/[username]/MakeDeadCell/discussions
+    about: Ask questions, share ideas, and discuss the framework with the community
+  - name: 🎮 Unity Forums
+    url: https://forum.unity.com/
+    about: For general Unity development questions not specific to this framework
+  - name: 📖 Documentation
+    url: https://github.com/[username]/MakeDeadCell/blob/main/README.md
+    about: Check our comprehensive documentation before reporting issues
