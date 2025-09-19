@@ -2,7 +2,7 @@ using UnityEngine;
 using DeadCells.Core;
 using DeadCells.Player;
 using DeadCells.Combat;
-using DeadCells.Rooms;
+using DeadCells.Data;
 
 namespace DeadCells.Game
 {
@@ -29,7 +29,7 @@ namespace DeadCells.Game
         
         public GameObject CreateWeapon(string weaponId, Transform parent = null)
         {
-            var weaponData = CastleDBManager.Instance?.GetWeapon(weaponId);
+            var weaponData = GetWeaponData(weaponId);
             if (weaponData == null)
             {
                 Debug.LogError($"Weapon data not found for ID: {weaponId}");
@@ -37,6 +37,18 @@ namespace DeadCells.Game
             }
             
             return CreateWeapon(weaponData, parent);
+        }
+        
+        /// <summary>
+        /// 从CastleDBManager获取武器数据的适配器方法
+        /// </summary>
+        private WeaponData GetWeaponData(string weaponId)
+        {
+            var jsonData = CastleDBManager.Instance?.GetRawJsonData("weapon", weaponId);
+            if (string.IsNullOrEmpty(jsonData))
+                return null;
+                
+            return CastleDBManager.Instance.DeserializeData<WeaponData>(jsonData);
         }
         
         public GameObject CreateWeapon(WeaponData weaponData, Transform parent = null)
@@ -121,13 +133,20 @@ namespace DeadCells.Game
         
         public WeaponData[] GetAllWeapons()
         {
-            if (CastleDBManager.Instance?.Weapons == null)
+            if (CastleDBManager.Instance?.WeaponJsonData == null)
                 return new WeaponData[0];
             
-            var weapons = CastleDBManager.Instance.Weapons.Values;
-            var weaponArray = new WeaponData[weapons.Count];
-            weapons.CopyTo(weaponArray, 0);
-            return weaponArray;
+            var weaponJsonData = CastleDBManager.Instance.WeaponJsonData;
+            var weaponList = new System.Collections.Generic.List<WeaponData>();
+            
+            foreach (var kvp in weaponJsonData)
+            {
+                var weaponData = CastleDBManager.Instance.DeserializeData<WeaponData>(kvp.Value);
+                if (weaponData != null)
+                    weaponList.Add(weaponData);
+            }
+            
+            return weaponList.ToArray();
         }
         
         public WeaponData[] GetWeaponsByType(string weaponType)

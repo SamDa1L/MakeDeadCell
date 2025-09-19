@@ -1,7 +1,6 @@
 using UnityEngine;
-using DeadCells.Combat;
 
-namespace DeadCells.Player
+namespace DeadCells.Combat
 {
     public class EnemyController : MonoBehaviour
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DeadCells.Core;
 using DeadCells.Player;
 using DeadCells.Combat;
+using DeadCells.Data;
 using LDtkUnity;
 
 namespace DeadCells.Rooms
@@ -69,10 +70,28 @@ namespace DeadCells.Rooms
         private void LoadRoomData()
         {
             // Get room data from CastleDB
-            if (CastleDBManager.Instance?.Rooms != null)
+            if (CastleDBManager.Instance?.RoomJsonData != null)
             {
-                roomDataMap = CastleDBManager.Instance.Rooms;
+                var roomJsonData = CastleDBManager.Instance.RoomJsonData;
+                foreach (var kvp in roomJsonData)
+                {
+                    var roomData = CastleDBManager.Instance.DeserializeData<RoomData>(kvp.Value);
+                    if (roomData != null)
+                        roomDataMap[kvp.Key] = roomData;
+                }
             }
+        }
+        
+        /// <summary>
+        /// 从CastleDBManager获取敌人数据的适配器方法
+        /// </summary>
+        private EnemyData GetEnemyData(string enemyId)
+        {
+            var jsonData = CastleDBManager.Instance?.GetRawJsonData("enemy", enemyId);
+            if (string.IsNullOrEmpty(jsonData))
+                return null;
+                
+            return CastleDBManager.Instance.DeserializeData<EnemyData>(jsonData);
         }
         
         private void LoadStartingRoom()
@@ -185,7 +204,7 @@ namespace DeadCells.Rooms
         private void SpawnEnemy(string enemyId)
         {
             // Get enemy data from CastleDB
-            var enemyData = CastleDBManager.Instance?.GetEnemy(enemyId);
+            var enemyData = GetEnemyData(enemyId);
             if (enemyData == null)
             {
                 Debug.LogWarning($"Enemy data not found for ID: {enemyId}");
@@ -389,7 +408,7 @@ namespace DeadCells.Rooms
             string enemyType = GetEntityFieldValue(entity, "EnemyType", "default");
             
             // Get enemy data from CastleDB
-            var enemyData = CastleDBManager.Instance?.GetEnemy(enemyType);
+            var enemyData = GetEnemyData(enemyType);
             if (enemyData == null)
             {
                 Debug.LogWarning($"Enemy data not found for type: {enemyType}");

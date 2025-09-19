@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for file in Health.cs HitstunController.cs DamageInfo.cs CombatManager.cs)",
+      "Bash(grep:*)",
+      "Bash(done)",
+      "Bash(for dir in DeadCells.*)",
+      "Bash(do if [ -d \"$dir\" ])",
+      "Bash(then echo \"目录: $dir\")",
+      "Bash(fi)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(for file in *.cs)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

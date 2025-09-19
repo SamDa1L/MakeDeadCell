@@ -1,13 +1,7 @@
 {
-    "name": "DeadCells.Game",
-    "rootNamespace": "DeadCells.Game",
-    "references": [
-        "DeadCells.Core",
-        "DeadCells.Data",
-        "DeadCells.Combat",
-        "DeadCells.Player",
-        "DeadCells.Rooms"
-    ],
+    "name": "DeadCells.Data",
+    "rootNamespace": "DeadCells.Data",
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
