@@ -1,0 +1,18 @@
+{
+    "name": "DeadCells.Rooms",
+    "rootNamespace": "DeadCells.Rooms",
+    "references": [
+        "DeadCells.Core",
+        "LDtkUnity.Runtime",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

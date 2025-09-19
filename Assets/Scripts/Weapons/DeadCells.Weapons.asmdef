@@ -1,0 +1,18 @@
+{
+    "name": "DeadCells.Weapons",
+    "rootNamespace": "DeadCells.Weapons",
+    "references": [
+        "DeadCells.Core",
+        "DeadCells.Combat",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

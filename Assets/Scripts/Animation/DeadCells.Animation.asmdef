@@ -1,0 +1,17 @@
+{
+    "name": "DeadCells.Animation",
+    "rootNamespace": "DeadCells.Animation",
+    "references": [
+        "DeadCells.Core",
+        "Unity.Timeline"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
