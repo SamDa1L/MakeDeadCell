@@ -1,6 +1,6 @@
 {
     "name": "DeadCells.Tools",
-    "rootNamespace": "DeadCells.Tools",
+    "rootNamespace": "DeadCellsTestFramework.Tools",
     "references": [
         "LDtkUnity.Runtime",
         "Unity.TextMeshPro"

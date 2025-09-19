@@ -1,7 +1,8 @@
 {
     "name": "DeadCells.Data",
-    "rootNamespace": "DeadCells.Data",
+    "rootNamespace": "DeadCellsTestFramework.Data",
     "references": [
+        "DeadCells.Combat",
         "Unity.TextMeshPro",
         "Unity.Newtonsoft.Json"
     ],

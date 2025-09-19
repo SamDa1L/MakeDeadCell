@@ -1,5 +1,4 @@
 using UnityEngine;
-using DeadCellsTestFramework.Weapons;
 using DeadCellsTestFramework.Combat;
 
 namespace DeadCellsTestFramework.Data
@@ -70,13 +69,8 @@ namespace DeadCellsTestFramework.Data
         
         private void ConfigureWeapon(GameObject weaponInstance, WeaponData data)
         {
-            // Configure base weapon properties
-            Weapon weapon = weaponInstance.GetComponent<Weapon>();
-            if (weapon != null)
-            {
-                // Use reflection or create a data-driven weapon component
-                ConfigureBaseWeapon(weapon, data);
-            }
+            // Configure base weapon properties using DataDrivenWeapon
+            ConfigureBaseWeapon(weaponInstance, data);
             
             // Configure specific weapon type
             if (data.weaponType.ToLower() == "melee")
@@ -92,13 +86,13 @@ namespace DeadCellsTestFramework.Data
             weaponInstance.name = data.name;
         }
         
-        private void ConfigureBaseWeapon(Weapon weapon, WeaponData data)
+        private void ConfigureBaseWeapon(GameObject weaponInstance, WeaponData data)
         {
-            // Since we can't directly modify private fields, we'll create a new data-driven weapon component
-            var dataWeapon = weapon.GetComponent<DataDrivenWeapon>();
+            // Add DataDrivenWeapon component to provide weapon data
+            var dataWeapon = weaponInstance.GetComponent<DataDrivenWeapon>();
             if (dataWeapon == null)
             {
-                dataWeapon = weapon.gameObject.AddComponent<DataDrivenWeapon>();
+                dataWeapon = weaponInstance.AddComponent<DataDrivenWeapon>();
             }
             
             dataWeapon.Initialize(data);
@@ -106,21 +100,19 @@ namespace DeadCellsTestFramework.Data
         
         private void ConfigureMeleeWeapon(GameObject weaponInstance, WeaponData data)
         {
-            MeleeWeapon melee = weaponInstance.GetComponent<MeleeWeapon>();
-            if (melee != null && data.stats != null)
+            // Use message-based approach to configure melee weapon
+            if (data.stats != null)
             {
-                // Configure melee-specific properties
-                // These would need to be exposed as public properties in MeleeWeapon
+                weaponInstance.SendMessage("ConfigureMeleeStats", data.stats, SendMessageOptions.DontRequireReceiver);
             }
         }
         
         private void ConfigureRangedWeapon(GameObject weaponInstance, WeaponData data)
         {
-            RangedWeapon ranged = weaponInstance.GetComponent<RangedWeapon>();
-            if (ranged != null && data.stats != null)
+            // Use message-based approach to configure ranged weapon
+            if (data.stats != null)
             {
-                // Configure ranged-specific properties
-                // These would need to be exposed as public properties in RangedWeapon
+                weaponInstance.SendMessage("ConfigureRangedStats", data.stats, SendMessageOptions.DontRequireReceiver);
             }
         }
         

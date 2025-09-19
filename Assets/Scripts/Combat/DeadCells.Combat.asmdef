@@ -1,6 +1,6 @@
 {
     "name": "DeadCells.Combat",
-    "rootNamespace": "DeadCells.Combat",
+    "rootNamespace": "DeadCellsTestFramework.Combat",
     "references": [
         "Unity.TextMeshPro"
     ],

@@ -28,10 +28,8 @@ namespace DeadCellsTestFramework.Combat
             hitstunTimer = duration;
             
             // Disable movement/actions during hitstun
-            var playerController = GetComponent<DeadCellsTestFramework.Player.PlayerController>();
-            var enemyController = GetComponent<EnemyController>();
-            
-            // Player and enemy controllers should check IsInHitstun before allowing actions
+            // Controllers should check IsInHitstun before allowing actions
+            // This can be accessed via GetComponent<HitstunController>().IsInHitstun
         }
         
         private void EndHitstun()

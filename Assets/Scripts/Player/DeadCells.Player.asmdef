@@ -1,10 +1,10 @@
 {
     "name": "DeadCells.Player",
-    "rootNamespace": "DeadCells.Player",
+    "rootNamespace": "DeadCellsTestFramework.Player",
     "references": [
         "DeadCells.Combat",
         "DeadCells.Weapons",
-        "DeadCells.Animation",
+        "DeadCells.Rooms",
         "Unity.TextMeshPro",
         "Unity.InputSystem"
     ],

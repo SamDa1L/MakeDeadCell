@@ -1,6 +1,6 @@
 {
     "name": "DeadCells.Core",
-    "rootNamespace": "DeadCells.Core",
+    "rootNamespace": "DeadCellsTestFramework.Core",
     "references": [
         "DeadCells.Data",
         "DeadCells.Player",

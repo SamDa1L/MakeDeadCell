@@ -1,6 +1,6 @@
 {
     "name": "DeadCells.Animation",
-    "rootNamespace": "DeadCells.Animation",
+    "rootNamespace": "DeadCellsTestFramework.Animation",
     "references": [
         "Unity.Timeline"
     ],

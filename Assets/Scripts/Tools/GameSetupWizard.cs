@@ -1,10 +1,7 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using DeadCellsTestFramework.Core;
-using DeadCellsTestFramework.Data;
-using DeadCellsTestFramework.Rooms;
-using DeadCellsTestFramework.Combat;
-using DeadCellsTestFramework.Effects;
+using System;
+using System.Reflection;
 
 namespace DeadCellsTestFramework.Tools
 {
@@ -47,53 +44,53 @@ namespace DeadCellsTestFramework.Tools
             Debug.Log("Creating manager objects...");
             
             // Create main GameManager
-            if (FindObjectOfType<GameManager>() == null)
+            if (GameObject.Find("GameManager") == null)
             {
                 GameObject gameManager = new GameObject("GameManager");
-                gameManager.AddComponent<GameManager>();
+                AddComponentByName(gameManager, "DeadCellsTestFramework.Core.GameManager");
             }
             
             // Create CastleDBManager
-            if (FindObjectOfType<CastleDBManager>() == null)
+            if (GameObject.Find("CastleDBManager") == null)
             {
                 GameObject castleDBManager = new GameObject("CastleDBManager");
-                castleDBManager.AddComponent<CastleDBManager>();
+                AddComponentByName(castleDBManager, "DeadCellsTestFramework.Data.CastleDBManager");
             }
             
             // Note: Official LDtk Unity package components are created through the LDtk project asset
             
             // Create WeaponFactory
-            if (FindObjectOfType<WeaponFactory>() == null)
+            if (GameObject.Find("WeaponFactory") == null)
             {
                 GameObject weaponFactory = new GameObject("WeaponFactory");
-                weaponFactory.AddComponent<WeaponFactory>();
+                AddComponentByName(weaponFactory, "DeadCellsTestFramework.Data.WeaponFactory");
             }
             
             // Create CombatManager
-            if (FindObjectOfType<CombatManager>() == null)
+            if (GameObject.Find("CombatManager") == null)
             {
                 GameObject combatManager = new GameObject("CombatManager");
-                combatManager.AddComponent<CombatManager>();
+                AddComponentByName(combatManager, "DeadCellsTestFramework.Combat.CombatManager");
             }
             
             // Create EffectsManager
-            if (FindObjectOfType<EffectsManager>() == null)
+            if (GameObject.Find("EffectsManager") == null)
             {
                 GameObject effectsManager = new GameObject("EffectsManager");
-                effectsManager.AddComponent<EffectsManager>();
+                AddComponentByName(effectsManager, "DeadCellsTestFramework.Effects.EffectsManager");
             }
             
             // Create room managers
-            if (FindObjectOfType<RoomManager>() == null)
+            if (GameObject.Find("RoomManager") == null)
             {
                 GameObject roomManager = new GameObject("RoomManager");
-                roomManager.AddComponent<RoomManager>();
+                AddComponentByName(roomManager, "DeadCellsTestFramework.Rooms.RoomManager");
             }
             
-            if (FindObjectOfType<LDtkRoomManager>() == null)
+            if (GameObject.Find("LDtkRoomManager") == null)
             {
                 GameObject ldtkRoomManager = new GameObject("LDtkRoomManager");
-                ldtkRoomManager.AddComponent<LDtkRoomManager>();
+                AddComponentByName(ldtkRoomManager, "DeadCellsTestFramework.Rooms.LDtkRoomManager");
             }
         }
         
@@ -173,14 +170,10 @@ namespace DeadCellsTestFramework.Tools
                 rectTransform.offsetMin = Vector2.zero;
                 rectTransform.offsetMax = Vector2.zero;
                 
-                screenFlashObject.AddComponent<ScreenFlash>();
+                AddComponentByName(screenFlashObject, "DeadCellsTestFramework.Effects.ScreenFlash");
                 
-                // Assign to EffectsManager
-                EffectsManager effectsManager = FindObjectOfType<EffectsManager>();
-                if (effectsManager != null)
-                {
-                    Debug.Log("Please manually assign ScreenFlash to EffectsManager");
-                }
+                // Note: Please manually assign ScreenFlash to EffectsManager
+                Debug.Log("Please manually assign ScreenFlash to EffectsManager");
             }
         }
         
@@ -232,7 +225,7 @@ namespace DeadCellsTestFramework.Tools
         
         private void CreatePlayer()
         {
-            if (FindObjectOfType<Player.PlayerController>() == null)
+            if (GameObject.Find("Player") == null)
             {
                 GameObject player;
                 
@@ -243,12 +236,12 @@ namespace DeadCellsTestFramework.Tools
                 else
                 {
                     player = new GameObject("Player");
-                    player.AddComponent<Player.PlayerController>();
+                    AddComponentByName(player, "DeadCellsTestFramework.Player.PlayerController");
                     player.AddComponent<Rigidbody2D>();
                     player.AddComponent<BoxCollider2D>();
-                    player.AddComponent<Combat.Health>();
-                    player.AddComponent<Combat.HitstunController>();
-                    player.AddComponent<Animation.AnimationController>();
+                    AddComponentByName(player, "DeadCellsTestFramework.Combat.Health");
+                    AddComponentByName(player, "DeadCellsTestFramework.Combat.HitstunController");
+                    AddComponentByName(player, "DeadCellsTestFramework.Animation.AnimationController");
                     
                     // Create GroundCheck
                     GameObject groundCheck = new GameObject("GroundCheck");
@@ -270,6 +263,27 @@ namespace DeadCellsTestFramework.Tools
             // The example CastleDB file is already created in StreamingAssets
             Debug.Log("✅ Example data available at Assets/StreamingAssets/Data/castle_db_example.cdb");
             Debug.Log("📖 Read README_CastleDB_LDtk.md for complete setup instructions");
+        }
+        
+        private void AddComponentByName(GameObject gameObject, string typeName)
+        {
+            try
+            {
+                Type componentType = Type.GetType(typeName);
+                if (componentType != null)
+                {
+                    gameObject.AddComponent(componentType);
+                    Debug.Log($"Added component: {typeName}");
+                }
+                else
+                {
+                    Debug.LogWarning($"Could not find type: {typeName}");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to add component {typeName}: {e.Message}");
+            }
         }
     }
 }

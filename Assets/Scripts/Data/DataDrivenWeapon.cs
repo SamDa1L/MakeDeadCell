@@ -1,10 +1,13 @@
 using UnityEngine;
-using DeadCellsTestFramework.Weapons;
 using DeadCellsTestFramework.Combat;
 
 namespace DeadCellsTestFramework.Data
 {
-    public class DataDrivenWeapon : Weapon
+    /// <summary>
+    /// Data component that provides weapon statistics from CastleDB
+    /// This component should be attached alongside a Weapon component
+    /// </summary>
+    public class DataDrivenWeapon : MonoBehaviour
     {
         [Header("Data-Driven Properties")]
         [SerializeField] private WeaponData weaponData;
@@ -15,133 +18,48 @@ namespace DeadCellsTestFramework.Data
         public void Initialize(WeaponData data)
         {
             weaponData = data;
-            
-            if (useDataValues && weaponData != null)
-            {
-                ApplyWeaponData();
-            }
         }
         
-        private void ApplyWeaponData()
+        /// <summary>
+        /// Get weapon statistics for use by Weapon components
+        /// </summary>
+        public RuntimeWeaponStats GetWeaponStats()
         {
-            // Override base weapon properties with data values
-            weaponName = weaponData.name;
-            baseDamage = weaponData.baseDamage;
-            attackSpeed = weaponData.attackSpeed;
-            range = weaponData.range;
-            
-            // Set weapon type
-            switch (weaponData.weaponType.ToLower())
-            {
-                case "melee":
-                    weaponType = WeaponType.Melee;
-                    break;
-                case "ranged":
-                    weaponType = WeaponType.Ranged;
-                    break;
-                case "magic":
-                    weaponType = WeaponType.Magic;
-                    break;
-                default:
-                    weaponType = WeaponType.Melee;
-                    break;
-            }
-        }
-        
-        public override bool TryAttack(Vector2 attackDirection)
-        {
-            if (!canAttack) return false;
-            
-            PerformAttack(attackDirection);
-            return true;
-        }
-        
-        protected override void PerformAttack(Vector2 attackDirection)
-        {
-            RegisterAttack();
-            
-            switch (weaponType)
-            {
-                case WeaponType.Melee:
-                    PerformMeleeAttack(attackDirection);
-                    break;
-                case WeaponType.Ranged:
-                    PerformRangedAttack(attackDirection);
-                    break;
-                case WeaponType.Magic:
-                    PerformMagicAttack(attackDirection);
-                    break;
-            }
-        }
-        
-        private void PerformMeleeAttack(Vector2 attackDirection)
-        {
-            // Get attack point and radius from data or use defaults
-            Transform attackPoint = transform.Find("AttackPoint") ?? transform;
-            float attackRadius = weaponData?.stats?.knockback ?? 1f;
-            
-            // Detect targets in attack range
-            Collider2D[] hitTargets = Physics2D.OverlapCircleAll(attackPoint.position, attackRadius, targetLayerMask);
-            
-            foreach (var target in hitTargets)
-            {
-                if (target.gameObject == gameObject) continue;
+            if (weaponData == null)
+                return new RuntimeWeaponStats();
                 
-                Vector2 knockbackDirection = (target.transform.position - transform.position).normalized;
-                DamageInfo damageInfo = CreateDataDrivenDamageInfo(knockbackDirection);
-                
-                CombatManager.Instance?.DealDamage(gameObject, target.gameObject, damageInfo);
-            }
-        }
-        
-        private void PerformRangedAttack(Vector2 attackDirection)
-        {
-            Transform firePoint = transform.Find("FirePoint") ?? transform;
-            
-            // Load projectile prefab based on data
-            GameObject projectilePrefab = LoadProjectilePrefab();
-            if (projectilePrefab != null)
+            return new RuntimeWeaponStats
             {
-                GameObject projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-                
-                Projectile projComponent = projectile.GetComponent<Projectile>();
-                if (projComponent == null)
-                    projComponent = projectile.AddComponent<Projectile>();
-                
-                DamageInfo damageInfo = CreateDataDrivenDamageInfo(attackDirection);
-                float projectileSpeed = 10f; // Could be in weapon data
-                
-                projComponent.Initialize(attackDirection, projectileSpeed, range, damageInfo, targetLayerMask);
-            }
+                name = weaponData.name,
+                baseDamage = weaponData.baseDamage,
+                attackSpeed = weaponData.attackSpeed,
+                range = weaponData.range,
+                critChance = weaponData.critChance,
+                critMultiplier = weaponData.critMultiplier
+            };
         }
         
-        private void PerformMagicAttack(Vector2 attackDirection)
+        /// <summary>
+        /// Create damage info based on weapon data
+        /// </summary>
+        public DamageInfo CreateDataDrivenDamageInfo(Vector2 knockbackDirection)
         {
-            // Implement magic attack logic
-            // This could spawn spell effects, area damage, etc.
-            PerformRangedAttack(attackDirection); // Fallback to ranged for now
-        }
-        
-        protected override DamageInfo CreateDamageInfo(Vector2 knockbackDirection)
-        {
-            return CreateDataDrivenDamageInfo(knockbackDirection);
-        }
-        
-        private DamageInfo CreateDataDrivenDamageInfo(Vector2 knockbackDirection)
-        {
+            if (weaponData == null)
+                return new DamageInfo { baseDamage = 10f, source = gameObject };
+                
             var damageInfo = new DamageInfo
             {
-                baseDamage = weaponData?.baseDamage ?? baseDamage,
+                baseDamage = weaponData.baseDamage,
                 canCrit = true,
-                critChance = weaponData?.critChance ?? 0.05f,
-                critMultiplier = weaponData?.critMultiplier ?? 2f,
-                knockback = knockbackDirection * (weaponData?.stats?.knockback ?? 5f),
-                hitstunDuration = weaponData?.stats?.hitstunDuration ?? 0.2f,
+                critChance = weaponData.critChance,
+                critMultiplier = weaponData.critMultiplier,
+                knockback = knockbackDirection * (weaponData.stats?.knockback ?? 5f),
+                hitstunDuration = weaponData.stats?.hitstunDuration ?? 0.2f,
                 source = gameObject
             };
             
             // Set damage type from data
-            damageInfo.damageType = ParseDamageType(weaponData?.damageType ?? "Physical");
+            damageInfo.damageType = ParseDamageType(weaponData.damageType ?? "Physical");
             
             return damageInfo;
         }
@@ -160,22 +78,21 @@ namespace DeadCellsTestFramework.Data
             }
         }
         
-        private GameObject LoadProjectilePrefab()
-        {
-            // Try to load from the prefab path specified in data
-            if (!string.IsNullOrEmpty(weaponData?.prefabPath))
-            {
-                return Resources.Load<GameObject>(weaponData.prefabPath);
-            }
-            
-            // Fallback to default projectile
-            return Resources.Load<GameObject>("Weapons/DefaultProjectile");
-        }
-        
         // Expose data properties for UI and other systems
         public string GetDescription() => weaponData?.description ?? "";
         public string GetIconPath() => weaponData?.iconPath ?? "";
         public float GetCritChance() => weaponData?.critChance ?? 0f;
         public float GetCritMultiplier() => weaponData?.critMultiplier ?? 1f;
+    }
+    
+    [System.Serializable]
+    public class RuntimeWeaponStats
+    {
+        public string name;
+        public float baseDamage;
+        public float attackSpeed;
+        public float range;
+        public float critChance;
+        public float critMultiplier;
     }
 }

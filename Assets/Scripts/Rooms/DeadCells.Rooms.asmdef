@@ -1,7 +1,8 @@
 {
     "name": "DeadCells.Rooms",
-    "rootNamespace": "DeadCells.Rooms",
+    "rootNamespace": "DeadCellsTestFramework.Rooms",
     "references": [
+        "DeadCells.Data",
         "LDtkUnity.Runtime",
         "Unity.TextMeshPro"
     ],

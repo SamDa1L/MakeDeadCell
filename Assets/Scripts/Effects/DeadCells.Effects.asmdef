@@ -1,6 +1,6 @@
 {
     "name": "DeadCells.Effects",
-    "rootNamespace": "DeadCells.Effects",
+    "rootNamespace": "DeadCellsTestFramework.Effects",
     "references": [
         "Unity.TextMeshPro",
         "Unity.RenderPipelines.Universal.Runtime"

@@ -1,7 +1,8 @@
 using UnityEngine;
 using DeadCellsTestFramework.Player;
+using DeadCellsTestFramework.Rooms;
 
-namespace DeadCellsTestFramework.Rooms
+namespace DeadCellsTestFramework.Player
 {
     public class RoomDoor : MonoBehaviour
     {

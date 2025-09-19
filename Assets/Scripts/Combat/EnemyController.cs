@@ -1,9 +1,7 @@
 using UnityEngine;
-using DeadCellsTestFramework.Player;
-using DeadCellsTestFramework.Animation;
-using DeadCellsTestFramework.Effects;
+using DeadCellsTestFramework.Combat;
 
-namespace DeadCellsTestFramework.Combat
+namespace DeadCellsTestFramework.Player
 {
     public class EnemyController : MonoBehaviour
     {
@@ -17,7 +15,7 @@ namespace DeadCellsTestFramework.Combat
         [SerializeField] private Rigidbody2D rb;
         [SerializeField] private Health health;
         [SerializeField] private HitstunController hitstun;
-        [SerializeField] private AnimationController animController;
+        [SerializeField] private Animator animator;
         
         private Transform player;
         private bool playerInRange = false;
@@ -40,12 +38,13 @@ namespace DeadCellsTestFramework.Combat
             if (rb == null) rb = GetComponent<Rigidbody2D>();
             if (health == null) health = GetComponent<Health>();
             if (hitstun == null) hitstun = GetComponent<HitstunController>();
-            if (animController == null) animController = GetComponent<AnimationController>();
+            if (animator == null) animator = GetComponent<Animator>();
         }
         
         private void Start()
         {
-            player = FindObjectOfType<PlayerController>()?.transform;
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            player = playerObj?.transform;
             
             if (health != null)
             {
@@ -159,21 +158,21 @@ namespace DeadCellsTestFramework.Combat
         
         private void UpdateAnimation()
         {
-            if (animController == null) return;
+            if (animator == null) return;
             
             float speed = rb != null ? Mathf.Abs(rb.velocity.x) : 0f;
-            animController.SetSpeed(speed);
+            animator.SetFloat("Speed", speed);
             
             switch (currentState)
             {
                 case EnemyState.Attack:
-                    animController.TriggerAttack();
+                    animator.SetTrigger("Attack");
                     break;
                 case EnemyState.Hurt:
-                    animController.TriggerHurt();
+                    animator.SetTrigger("Hurt");
                     break;
                 case EnemyState.Death:
-                    animController.TriggerDeath();
+                    animator.SetTrigger("Death");
                     break;
             }
         }
@@ -183,8 +182,8 @@ namespace DeadCellsTestFramework.Combat
             currentState = EnemyState.Hurt;
             
             // Screen shake and effects
-            EffectsManager.Instance?.ShakeScreen(0.3f, 0.1f);
-            EffectsManager.Instance?.PlayHitEffect(transform.position);
+            // EffectsManager.Instance?.ShakeScreen(0.3f, 0.1f);
+            // EffectsManager.Instance?.PlayHitEffect(transform.position);
         }
         
         private void OnDeath()
@@ -200,7 +199,7 @@ namespace DeadCellsTestFramework.Combat
                 rb.simulated = false;
             
             // Play death effects
-            EffectsManager.Instance?.PlayDeathEffect(transform.position);
+            // EffectsManager.Instance?.PlayDeathEffect(transform.position);
         }
         
         private void OnDrawGizmosSelected()

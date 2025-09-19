@@ -116,9 +116,16 @@ namespace DeadCellsTestFramework.Combat
         
         private void HandleEnemyDeath()
         {
-            // Notify room that enemy was defeated
-            var room = FindObjectOfType<Rooms.Room>();
-            room?.OnEnemyDefeated(gameObject);
+            // Notify room that enemy was defeated using events or messages
+            // Room manager can listen for this event instead of direct coupling
+            // SendMessage or BroadcastMessage could be used, or a custom event system
+            
+            // For now, use a simple approach with GameObject.Find
+            GameObject roomManager = GameObject.Find("RoomManager");
+            if (roomManager != null)
+            {
+                roomManager.SendMessage("OnEnemyDefeated", gameObject, SendMessageOptions.DontRequireReceiver);
+            }
             
             // Destroy enemy after a delay
             Destroy(gameObject, 0.5f);
