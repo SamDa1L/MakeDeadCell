@@ -38,7 +38,10 @@
 	"backupRelPath": null,
 	"levelNamePattern": "Level_%idx",
 	"tutorialDesc": null,
-	"customCommands": [],
+	"customCommands": [{
+		"command": "../../../Library/LDtkTilesetExporter/ExportTilesetDefinition.exe \"LDtkLevelTest\"",
+		"when": "AfterSave"
+	}],
 	"flags": [],
 	"defs": { "layers": [], "entities": [], "tilesets": [
 		{
@@ -46,7 +49,7 @@
 			"__cHei": 6,
 			"identifier": "SimpleTileSet",
 			"uid": 1,
-			"relPath": "Assets/Art/Tilesets/Foreground/Tileset.png",
+			"relPath": "../../Art/Tilesets/Foreground/Tileset.png",
 			"embedAtlas": null,
 			"pxWid": 160,
 			"pxHei": 96,
