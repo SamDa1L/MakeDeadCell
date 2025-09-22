@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 using DeadCells.Core;
 using DeadCells.Player;
 using DeadCells.Combat;
@@ -6,7 +7,7 @@ using DeadCells.Data;
 
 namespace DeadCells.Game
 {
-    public class WeaponFactory : MonoBehaviour
+    public class WeaponFactory : SystemComponent
     {
         [Header("Weapon Prefabs")]
         [SerializeField] private GameObject meleeWeaponPrefab;
@@ -15,16 +16,40 @@ namespace DeadCells.Game
         
         public static WeaponFactory Instance { get; private set; }
         
-        private void Awake()
+        protected override void Awake()
         {
             if (Instance == null)
             {
                 Instance = this;
+                base.Awake(); // 调用 SystemComponent 的 Awake 进行自动注册
             }
             else
             {
                 Destroy(gameObject);
             }
+        }
+        
+        protected override void OnDestroy()
+        {
+            // 清空静态引用，防止悬空引用
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+            
+            base.OnDestroy(); // 调用 SystemComponent 的 OnDestroy 进行注销
+        }
+        
+        /// <summary>
+        /// 安全获取WeaponFactory实例，自动处理空引用
+        /// </summary>
+        public static WeaponFactory GetInstance()
+        {
+            if (Instance == null || Instance.gameObject == null)
+            {
+                Instance = FindObjectOfType<WeaponFactory>();
+            }
+            return Instance;
         }
         
         public GameObject CreateWeapon(string weaponId, Transform parent = null)
@@ -44,11 +69,27 @@ namespace DeadCells.Game
         /// </summary>
         private WeaponData GetWeaponData(string weaponId)
         {
-            var jsonData = CastleDBManager.Instance?.GetRawJsonData("weapon", weaponId);
-            if (string.IsNullOrEmpty(jsonData))
+            var castleDB = CastleDBManager.Instance;
+            if (castleDB == null || castleDB.gameObject == null)
+            {
+                Debug.LogError("CastleDBManager not available! Cannot load weapon data.");
                 return null;
+            }
+            
+            if (!castleDB.IsDataLoaded)
+            {
+                Debug.LogError("CastleDB data not loaded! Make sure CastleDB file is assigned and loaded.");
+                return null;
+            }
                 
-            return CastleDBManager.Instance.DeserializeData<WeaponData>(jsonData);
+            var jsonData = castleDB.GetRawJsonData("weapon", weaponId);
+            if (string.IsNullOrEmpty(jsonData))
+            {
+                Debug.LogWarning($"Weapon data not found for id: {weaponId}. Check if id exists in CastleDB.");
+                return null;
+            }
+                
+            return castleDB.DeserializeData<WeaponData>(jsonData);
         }
         
         public GameObject CreateWeapon(WeaponData weaponData, Transform parent = null)
@@ -59,12 +100,21 @@ namespace DeadCells.Game
             GameObject weaponPrefab = GetWeaponPrefab(weaponData.weaponType);
             if (weaponPrefab == null)
             {
-                Debug.LogError($"No prefab found for weapon type: {weaponData.weaponType}");
+                Debug.LogError($"WeaponFactory: No prefab found for weapon type: {weaponData.weaponType}");
                 return null;
             }
             
             GameObject weaponInstance = Instantiate(weaponPrefab, parent);
+            
+            // Configure the weapon using the new system
             ConfigureWeapon(weaponInstance, weaponData);
+            
+            // Validate configuration
+            bool isValid = ValidateWeaponConfiguration(weaponInstance, weaponData.weaponType);
+            if (!isValid)
+            {
+                Debug.LogWarning($"WeaponFactory: Weapon '{weaponData.name}' was created but may not be fully functional");
+            }
             
             return weaponInstance;
         }
@@ -87,15 +137,11 @@ namespace DeadCells.Game
             // Configure base weapon properties using DataDrivenWeapon
             ConfigureBaseWeapon(weaponInstance, data);
             
-            // Configure specific weapon type
-            if (data.weaponType.ToLower() == "melee")
-            {
-                ConfigureMeleeWeapon(weaponInstance, data);
-            }
-            else if (data.weaponType.ToLower() == "ranged")
-            {
-                ConfigureRangedWeapon(weaponInstance, data);
-            }
+            // Use the new strongly-typed configuration system
+            var configResults = WeaponConfigurationManager.ConfigureWeapon(weaponInstance, data);
+            
+            // Log configuration results
+            LogConfigurationResults(configResults, data.name);
             
             // Set name and description
             weaponInstance.name = data.name;
@@ -113,35 +159,97 @@ namespace DeadCells.Game
             dataWeapon.Initialize(data);
         }
         
-        private void ConfigureMeleeWeapon(GameObject weaponInstance, WeaponData data)
+        /// <summary>
+        /// 记录武器配置结果
+        /// </summary>
+        /// <param name="results">配置结果列表</param>
+        /// <param name="weaponName">武器名称</param>
+        private void LogConfigurationResults(List<WeaponConfigurationResult> results, string weaponName)
         {
-            // Use message-based approach to configure melee weapon
-            if (data.stats != null)
+            if (results == null || results.Count == 0)
             {
-                weaponInstance.SendMessage("ConfigureMeleeStats", data.stats, SendMessageOptions.DontRequireReceiver);
+                Debug.LogWarning($"WeaponFactory: No configuration results for weapon '{weaponName}'");
+                return;
+            }
+            
+            int successCount = 0;
+            int failureCount = 0;
+            
+            foreach (var result in results)
+            {
+                if (result.Success)
+                {
+                    successCount++;
+                    Debug.Log($"WeaponFactory: Successfully configured {result.ComponentName} for weapon '{weaponName}'");
+                }
+                else
+                {
+                    failureCount++;
+                    Debug.LogWarning($"WeaponFactory: Failed to configure {result.ComponentName} for weapon '{weaponName}': {result.ErrorMessage}");
+                }
+            }
+            
+            if (failureCount > 0)
+            {
+                Debug.LogError($"WeaponFactory: Weapon '{weaponName}' configuration completed with {failureCount} failures and {successCount} successes");
+            }
+            else
+            {
+                Debug.Log($"WeaponFactory: Weapon '{weaponName}' configured successfully with {successCount} components");
             }
         }
         
-        private void ConfigureRangedWeapon(GameObject weaponInstance, WeaponData data)
+        /// <summary>
+        /// 验证武器配置完整性
+        /// </summary>
+        /// <param name="weaponInstance">武器实例</param>
+        /// <param name="expectedType">预期武器类型</param>
+        /// <returns>验证是否通过</returns>
+        private bool ValidateWeaponConfiguration(GameObject weaponInstance, string expectedType)
         {
-            // Use message-based approach to configure ranged weapon
-            if (data.stats != null)
+            if (weaponInstance == null)
             {
-                weaponInstance.SendMessage("ConfigureRangedStats", data.stats, SendMessageOptions.DontRequireReceiver);
+                Debug.LogError("WeaponFactory: Cannot validate null weapon instance");
+                return false;
             }
+            
+            bool isConfigured = WeaponConfigurationManager.IsWeaponProperlyConfigured(weaponInstance, expectedType);
+            
+            if (!isConfigured)
+            {
+                Debug.LogError($"WeaponFactory: Weapon '{weaponInstance.name}' is not properly configured for type '{expectedType}'");
+            }
+            
+            return isConfigured;
         }
         
         public WeaponData[] GetAllWeapons()
         {
-            if (CastleDBManager.Instance?.WeaponJsonData == null)
+            var castleDB = CastleDBManager.Instance;
+            if (castleDB == null || castleDB.gameObject == null)
+            {
+                Debug.LogError("CastleDBManager not available!");
                 return new WeaponData[0];
+            }
             
-            var weaponJsonData = CastleDBManager.Instance.WeaponJsonData;
+            if (!castleDB.IsDataLoaded)
+            {
+                Debug.LogError("CastleDB data not loaded!");
+                return new WeaponData[0];
+            }
+            
+            var weaponJsonData = castleDB.WeaponJsonData;
+            if (weaponJsonData == null || weaponJsonData.Count == 0)
+            {
+                Debug.LogWarning("No weapon data available in CastleDB");
+                return new WeaponData[0];
+            }
+            
             var weaponList = new System.Collections.Generic.List<WeaponData>();
             
             foreach (var kvp in weaponJsonData)
             {
-                var weaponData = CastleDBManager.Instance.DeserializeData<WeaponData>(kvp.Value);
+                var weaponData = castleDB.DeserializeData<WeaponData>(kvp.Value);
                 if (weaponData != null)
                     weaponList.Add(weaponData);
             }

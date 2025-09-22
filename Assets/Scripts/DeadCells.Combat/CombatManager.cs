@@ -22,6 +22,27 @@ namespace DeadCells.Combat
             }
         }
         
+        private void OnDestroy()
+        {
+            // 清空静态引用，防止悬空引用
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+        
+        /// <summary>
+        /// 安全获取CombatManager实例，自动处理空引用
+        /// </summary>
+        public static CombatManager GetInstance()
+        {
+            if (Instance == null || Instance.gameObject == null)
+            {
+                Instance = FindObjectOfType<CombatManager>();
+            }
+            return Instance;
+        }
+        
         public void DealDamage(GameObject attacker, GameObject target, DamageInfo damageInfo)
         {
             Health targetHealth = target.GetComponent<Health>();

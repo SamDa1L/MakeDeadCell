@@ -18,6 +18,9 @@ namespace DeadCells.Rooms
         [Header("LDtk Integration")]
         [SerializeField] private LDtkComponentProject ldtkProject;
         
+        [Header("Prefab Registry")]
+        [SerializeField] private PrefabRegistry prefabRegistry;
+        
         [Header("Room Settings")]
         [SerializeField] private Room currentRoom;
         [SerializeField] private string startingLevelId = "Level_0";
@@ -40,6 +43,27 @@ namespace DeadCells.Rooms
             {
                 Destroy(gameObject);
             }
+        }
+        
+        private void OnDestroy()
+        {
+            // 清空静态引用，防止悬空引用
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+        
+        /// <summary>
+        /// 安全获取LDtkRoomManager实例，自动处理空引用
+        /// </summary>
+        public static LDtkRoomManager GetInstance()
+        {
+            if (Instance == null || Instance.gameObject == null)
+            {
+                Instance = FindObjectOfType<LDtkRoomManager>();
+            }
+            return Instance;
         }
         
         private void Start()
@@ -70,16 +94,35 @@ namespace DeadCells.Rooms
         private void LoadRoomData()
         {
             // Get room data from CastleDB
-            if (CastleDBManager.Instance?.RoomJsonData != null)
+            var castleDB = CastleDBManager.Instance;
+            if (castleDB == null || castleDB.gameObject == null)
             {
-                var roomJsonData = CastleDBManager.Instance.RoomJsonData;
-                foreach (var kvp in roomJsonData)
-                {
-                    var roomData = CastleDBManager.Instance.DeserializeData<RoomData>(kvp.Value);
-                    if (roomData != null)
-                        roomDataMap[kvp.Key] = roomData;
-                }
+                Debug.LogWarning("CastleDBManager not available! Room data will not be loaded.");
+                return;
             }
+            
+            if (!castleDB.IsDataLoaded)
+            {
+                Debug.LogWarning("CastleDB data not loaded! Room data will not be available.");
+                return;
+            }
+            
+            var roomJsonData = castleDB.RoomJsonData;
+            if (roomJsonData == null || roomJsonData.Count == 0)
+            {
+                Debug.LogWarning("No room data available in CastleDB");
+                return;
+            }
+            
+            roomDataMap.Clear();
+            foreach (var kvp in roomJsonData)
+            {
+                var roomData = castleDB.DeserializeData<RoomData>(kvp.Value);
+                if (roomData != null)
+                    roomDataMap[kvp.Key] = roomData;
+            }
+            
+            Debug.Log($"Loaded {roomDataMap.Count} room configurations from CastleDB");
         }
         
         /// <summary>
@@ -87,11 +130,27 @@ namespace DeadCells.Rooms
         /// </summary>
         private EnemyData GetEnemyData(string enemyId)
         {
-            var jsonData = CastleDBManager.Instance?.GetRawJsonData("enemy", enemyId);
-            if (string.IsNullOrEmpty(jsonData))
+            var castleDB = CastleDBManager.Instance;
+            if (castleDB == null || castleDB.gameObject == null)
+            {
+                Debug.LogError("CastleDBManager not available! Cannot load enemy data.");
                 return null;
+            }
+            
+            if (!castleDB.IsDataLoaded)
+            {
+                Debug.LogError("CastleDB data not loaded! Make sure CastleDB file is assigned and loaded.");
+                return null;
+            }
                 
-            return CastleDBManager.Instance.DeserializeData<EnemyData>(jsonData);
+            var jsonData = castleDB.GetRawJsonData("enemy", enemyId);
+            if (string.IsNullOrEmpty(jsonData))
+            {
+                Debug.LogWarning($"Enemy data not found for id: {enemyId}. Check if id exists in CastleDB.");
+                return null;
+            }
+                
+            return castleDB.DeserializeData<EnemyData>(jsonData);
         }
         
         private void LoadStartingRoom()
@@ -229,13 +288,19 @@ namespace DeadCells.Rooms
         
         private GameObject LoadEnemyPrefab(EnemyData enemyData)
         {
-            if (!string.IsNullOrEmpty(enemyData.prefabPath))
+            if (prefabRegistry == null)
             {
-                return Resources.Load<GameObject>(enemyData.prefabPath);
+                Debug.LogError("LDtkRoomManager: PrefabRegistry not assigned! Cannot load enemy prefabs.");
+                return null;
             }
             
-            // Fallback to generic enemy prefab
-            return Resources.Load<GameObject>("Enemies/DefaultEnemy");
+            if (!string.IsNullOrEmpty(enemyData.prefabPath))
+            {
+                return prefabRegistry.GetEnemyPrefab(enemyData.prefabPath);
+            }
+            
+            // Fallback to default enemy prefab
+            return prefabRegistry.GetEnemyPrefab("DefaultEnemy");
         }
         
         private Vector3 GetEnemySpawnPosition()
@@ -430,8 +495,14 @@ namespace DeadCells.Rooms
             // Get treasure type from entity fields
             string treasureType = GetEntityFieldValue(entity, "TreasureType", "coin");
             
+            if (prefabRegistry == null)
+            {
+                Debug.LogError("LDtkRoomManager: PrefabRegistry not assigned! Cannot load treasure prefabs.");
+                return;
+            }
+            
             // Load and instantiate treasure prefab
-            GameObject treasurePrefab = Resources.Load<GameObject>($"Items/{treasureType}");
+            GameObject treasurePrefab = prefabRegistry.GetItemPrefab(treasureType);
             if (treasurePrefab != null)
             {
                 Vector3 worldPos = entity.transform.position;

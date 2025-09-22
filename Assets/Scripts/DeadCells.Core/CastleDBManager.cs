@@ -28,6 +28,10 @@ namespace DeadCells.Core
         public Dictionary<string, string> ItemJsonData => itemJsonData;
         public Dictionary<string, string> RoomJsonData => roomJsonData;
         
+        // 数据加载状态
+        public bool IsDataLoaded { get; private set; } = false;
+        public bool HasValidDatabase => castleDBFile != null;
+        
         private void Awake()
         {
             if (Instance == null)
@@ -49,16 +53,29 @@ namespace DeadCells.Core
         /// </summary>
         public void LoadDatabase()
         {
+            IsDataLoaded = false;
+            
             if (castleDBFile == null)
             {
-                Debug.LogWarning("CastleDB file not assigned!");
+                Debug.LogError("CastleDB file not assigned! Data-driven systems will not work.");
                 return;
             }
             
             try
             {
                 string jsonText = castleDBFile.text;
+                if (string.IsNullOrEmpty(jsonText))
+                {
+                    Debug.LogError("CastleDB file is empty!");
+                    return;
+                }
+                
                 var database = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonText);
+                if (database == null)
+                {
+                    Debug.LogError("Failed to parse CastleDB JSON!");
+                    return;
+                }
                 
                 // 加载各类数据
                 LoadWeaponsData(database);
@@ -66,11 +83,22 @@ namespace DeadCells.Core
                 LoadItemsData(database);
                 LoadRoomsData(database);
                 
-                Debug.Log($"CastleDB loaded: {weaponJsonData.Count} weapons, {enemyJsonData.Count} enemies, {itemJsonData.Count} items, {roomJsonData.Count} rooms");
+                IsDataLoaded = true;
+                int totalItems = weaponJsonData.Count + enemyJsonData.Count + itemJsonData.Count + roomJsonData.Count;
+                
+                if (totalItems == 0)
+                {
+                    Debug.LogWarning("CastleDB loaded but no data found! Check table names and structure.");
+                }
+                else
+                {
+                    Debug.Log($"CastleDB loaded successfully: {weaponJsonData.Count} weapons, {enemyJsonData.Count} enemies, {itemJsonData.Count} items, {roomJsonData.Count} rooms");
+                }
             }
             catch (System.Exception e)
             {
                 Debug.LogError($"Failed to load CastleDB: {e.Message}");
+                IsDataLoaded = false;
             }
         }
         
@@ -79,17 +107,50 @@ namespace DeadCells.Core
         /// </summary>
         public string GetRawJsonData(string category, string id)
         {
+            if (!IsDataLoaded)
+            {
+                Debug.LogWarning($"CastleDB data not loaded! Cannot get {category} data for id: {id}");
+                return null;
+            }
+            
+            if (string.IsNullOrEmpty(id))
+            {
+                Debug.LogWarning($"Invalid id provided for category: {category}");
+                return null;
+            }
+            
             switch (category.ToLower())
             {
                 case "weapon":
-                    return weaponJsonData.TryGetValue(id, out var weapon) ? weapon : null;
+                    if (!weaponJsonData.TryGetValue(id, out var weapon))
+                    {
+                        Debug.LogWarning($"Weapon with id '{id}' not found in CastleDB");
+                        return null;
+                    }
+                    return weapon;
                 case "enemy":
-                    return enemyJsonData.TryGetValue(id, out var enemy) ? enemy : null;
+                    if (!enemyJsonData.TryGetValue(id, out var enemy))
+                    {
+                        Debug.LogWarning($"Enemy with id '{id}' not found in CastleDB");
+                        return null;
+                    }
+                    return enemy;
                 case "item":
-                    return itemJsonData.TryGetValue(id, out var item) ? item : null;
+                    if (!itemJsonData.TryGetValue(id, out var item))
+                    {
+                        Debug.LogWarning($"Item with id '{id}' not found in CastleDB");
+                        return null;
+                    }
+                    return item;
                 case "room":
-                    return roomJsonData.TryGetValue(id, out var room) ? room : null;
+                    if (!roomJsonData.TryGetValue(id, out var room))
+                    {
+                        Debug.LogWarning($"Room with id '{id}' not found in CastleDB");
+                        return null;
+                    }
+                    return room;
                 default:
+                    Debug.LogWarning($"Unknown category: {category}");
                     return null;
             }
         }
@@ -115,23 +176,102 @@ namespace DeadCells.Core
         
         private void LoadWeaponsData(Dictionary<string, object> database)
         {
-            // 实现武器数据加载的逻辑，存储为JSON字符串
-            // 具体实现省略，存储原始JSON数据
+            weaponJsonData.Clear();
+            
+            if (database.TryGetValue("weapons", out var weaponsObj) && weaponsObj is Newtonsoft.Json.Linq.JArray weaponsArray)
+            {
+                foreach (var weaponItem in weaponsArray)
+                {
+                    var weaponJson = weaponItem.ToString();
+                    var weaponDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(weaponJson);
+                    
+                    if (weaponDict != null && weaponDict.TryGetValue("id", out var idObj))
+                    {
+                        string id = idObj.ToString();
+                        weaponJsonData[id] = weaponJson;
+                    }
+                }
+                Debug.Log($"Loaded {weaponJsonData.Count} weapons from CastleDB");
+            }
+            else
+            {
+                Debug.LogWarning("No 'weapons' table found in CastleDB or invalid format");
+            }
         }
         
         private void LoadEnemiesData(Dictionary<string, object> database)
         {
-            // 实现敌人数据加载的逻辑，存储为JSON字符串
+            enemyJsonData.Clear();
+            
+            if (database.TryGetValue("enemies", out var enemiesObj) && enemiesObj is Newtonsoft.Json.Linq.JArray enemiesArray)
+            {
+                foreach (var enemyItem in enemiesArray)
+                {
+                    var enemyJson = enemyItem.ToString();
+                    var enemyDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(enemyJson);
+                    
+                    if (enemyDict != null && enemyDict.TryGetValue("id", out var idObj))
+                    {
+                        string id = idObj.ToString();
+                        enemyJsonData[id] = enemyJson;
+                    }
+                }
+                Debug.Log($"Loaded {enemyJsonData.Count} enemies from CastleDB");
+            }
+            else
+            {
+                Debug.LogWarning("No 'enemies' table found in CastleDB or invalid format");
+            }
         }
         
         private void LoadItemsData(Dictionary<string, object> database)
         {
-            // 实现道具数据加载的逻辑，存储为JSON字符串
+            itemJsonData.Clear();
+            
+            if (database.TryGetValue("items", out var itemsObj) && itemsObj is Newtonsoft.Json.Linq.JArray itemsArray)
+            {
+                foreach (var itemItem in itemsArray)
+                {
+                    var itemJson = itemItem.ToString();
+                    var itemDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(itemJson);
+                    
+                    if (itemDict != null && itemDict.TryGetValue("id", out var idObj))
+                    {
+                        string id = idObj.ToString();
+                        itemJsonData[id] = itemJson;
+                    }
+                }
+                Debug.Log($"Loaded {itemJsonData.Count} items from CastleDB");
+            }
+            else
+            {
+                Debug.LogWarning("No 'items' table found in CastleDB or invalid format");
+            }
         }
         
         private void LoadRoomsData(Dictionary<string, object> database)
         {
-            // 实现房间数据加载的逻辑，存储为JSON字符串
+            roomJsonData.Clear();
+            
+            if (database.TryGetValue("rooms", out var roomsObj) && roomsObj is Newtonsoft.Json.Linq.JArray roomsArray)
+            {
+                foreach (var roomItem in roomsArray)
+                {
+                    var roomJson = roomItem.ToString();
+                    var roomDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(roomJson);
+                    
+                    if (roomDict != null && roomDict.TryGetValue("id", out var idObj))
+                    {
+                        string id = idObj.ToString();
+                        roomJsonData[id] = roomJson;
+                    }
+                }
+                Debug.Log($"Loaded {roomJsonData.Count} rooms from CastleDB");
+            }
+            else
+            {
+                Debug.LogWarning("No 'rooms' table found in CastleDB or invalid format");
+            }
         }
     }
 }

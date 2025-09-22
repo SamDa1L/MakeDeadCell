@@ -1,7 +1,6 @@
 using UnityEngine;
-using DeadCells.Player;
 using DeadCells.Combat;
-using DeadCells.Rooms;
+using DeadCells.Data;
 
 namespace DeadCells.Game
 {
@@ -13,7 +12,6 @@ namespace DeadCells.Game
     {
         [Header("Data-Driven Properties")]
         [SerializeField] private WeaponData weaponData;
-        [SerializeField] private bool useDataValues = true;
         
         public WeaponData WeaponData => weaponData;
         
