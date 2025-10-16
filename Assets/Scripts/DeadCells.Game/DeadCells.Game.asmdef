@@ -6,7 +6,9 @@
         "DeadCells.Data",
         "DeadCells.Combat",
         "DeadCells.Player",
-        "DeadCells.Rooms"
+        "DeadCells.Rooms",
+        "LDtkUnity.Runtime",
+        "Cinemachine"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

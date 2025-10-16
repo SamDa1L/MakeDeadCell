@@ -23,6 +23,11 @@ namespace DeadCells.Player
     {
         public PlayerIdleState(PlayerStateMachine stateMachine, PlayerController player) : base(stateMachine, player) { }
         
+        public override void Enter()
+        {
+            player.PlayAnimation(PlayerController.PlayerAnimationState.Idle);
+        }
+        
         public override void Update()
         {
             if (player.Input.AttackPressed)
@@ -60,6 +65,11 @@ namespace DeadCells.Player
     public class PlayerMoveState : PlayerState
     {
         public PlayerMoveState(PlayerStateMachine stateMachine, PlayerController player) : base(stateMachine, player) { }
+        
+        public override void Enter()
+        {
+            player.PlayAnimation(PlayerController.PlayerAnimationState.Run);
+        }
         
         public override void Update()
         {
@@ -107,6 +117,7 @@ namespace DeadCells.Player
         public override void Enter()
         {
             player.Jump();
+            player.PlayAnimation(PlayerController.PlayerAnimationState.Jump, forceRestart: true);
         }
         
         public override void Update()
@@ -134,6 +145,11 @@ namespace DeadCells.Player
     {
         public PlayerFallState(PlayerStateMachine stateMachine, PlayerController player) : base(stateMachine, player) { }
         
+        public override void Enter()
+        {
+            player.PlayAnimation(PlayerController.PlayerAnimationState.Fall, forceRestart: true);
+        }
+        
         public override void Update()
         {
             if (player.Input.AttackPressed)
@@ -145,9 +161,13 @@ namespace DeadCells.Player
             if (player.IsGrounded)
             {
                 if (Mathf.Abs(player.Input.Horizontal) > 0.1f)
+                {
                     stateMachine.ChangeState(stateMachine.MoveState);
+                }
                 else
+                {
                     stateMachine.ChangeState(stateMachine.IdleState);
+                }
                 return;
             }
         }
@@ -168,6 +188,7 @@ namespace DeadCells.Player
         public override void Enter()
         {
             attackTimer = ATTACK_DURATION;
+            player.TriggerAttackAnimation();
             // Trigger attack animation and logic here
         }
         
@@ -180,9 +201,13 @@ namespace DeadCells.Player
                 if (player.IsGrounded)
                 {
                     if (Mathf.Abs(player.Input.Horizontal) > 0.1f)
+                    {
                         stateMachine.ChangeState(stateMachine.MoveState);
+                    }
                     else
+                    {
                         stateMachine.ChangeState(stateMachine.IdleState);
+                    }
                 }
                 else
                 {
@@ -203,6 +228,7 @@ namespace DeadCells.Player
         public override void Enter()
         {
             rollTimer = ROLL_DURATION;
+            player.TriggerRollAnimation();
         }
         
         public override void Update()
@@ -214,9 +240,13 @@ namespace DeadCells.Player
                 if (player.IsGrounded)
                 {
                     if (Mathf.Abs(player.Input.Horizontal) > 0.1f)
+                    {
                         stateMachine.ChangeState(stateMachine.MoveState);
+                    }
                     else
+                    {
                         stateMachine.ChangeState(stateMachine.IdleState);
+                    }
                 }
                 else
                 {

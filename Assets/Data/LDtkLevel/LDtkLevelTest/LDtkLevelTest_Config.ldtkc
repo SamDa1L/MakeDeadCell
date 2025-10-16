@@ -1,0 +1,30 @@
+{
+    "PixelsPerUnit": 16,
+    "CustomLevelPrefab": {
+        "instanceID": 0
+    },
+    "IntGridValueColorsVisible": false,
+    "UseCompositeCollider": true,
+    "GeometryType": 0,
+    "CreateBackgroundColor": true,
+    "CreateLevelBoundsTrigger": false,
+    "UseParallax": true,
+    "IntGridValues": [
+        {
+            "_key": "GroundCollisions_1",
+            "_asset": {
+                "fileID": 11400000,
+                "guid": "cbc629294da0d7544bbb52cc7cd85bdf",
+                "type": 2
+            }
+        }
+    ],
+    "Entities": [
+        {
+            "_key": "PlayerSpawn",
+            "_asset": {
+                "instanceID": 0
+            }
+        }
+    ]
+}

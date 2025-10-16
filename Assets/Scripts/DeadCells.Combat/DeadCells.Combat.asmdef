@@ -2,7 +2,8 @@
     "name": "DeadCells.Combat",
     "rootNamespace": "DeadCells.Combat",
     "references": [
-        "DeadCells.Core"
+        "DeadCells.Core",
+        "DeadCells.Data"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -2,12 +2,28 @@
 	"identifier": "Level_0",
 	"uniqueIdentifer": "b2c0ac42-8560-11f0-9b5c-bfa5111824ad",
 	"x": 0,
-	"y": 0,
-	"width": 256,
-	"height": 256,
+	"y": -112,
+	"width": 976,
+	"height": 368,
 	"bgColor": "#696A79",
 	"neighbourLevels": [],
 	"customFields" : {},
-	"layers": [],
-	"entities" : {}
+	"layers": [
+		"Tiles.png"
+	],
+	"entities": {
+		"PlayerSpawn": [
+			{
+				"id": "PlayerSpawn",
+				"iid": "0a282120-8560-11f0-8c27-e978493477e0",
+				"layer": "PlayerSpawn",
+				"x": 80,
+				"y": 192,
+				"width": 16,
+				"height": 16,
+				"color": 6539085,
+				"customFields" : {}
+			}
+		]
+	}
 }

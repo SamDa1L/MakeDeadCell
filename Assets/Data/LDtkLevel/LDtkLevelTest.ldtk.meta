@@ -9,7 +9,7 @@ ScriptedImporter:
   assetBundleVariant: 
   script: {fileID: 11500000, guid: aaa16bfc62c086f4fb45da87b6acf9b1, type: 3}
   _reimportOnDependencyChange: 1
-  _jsonFile: {instanceID: 0}
+  _jsonFile: {fileID: -164016180542632921, guid: a97264676ddbff041a138c04791233c4, type: 3}
   _pixelsPerUnit: 16
   _customLevelPrefab: {instanceID: 0}
   _intGridValueColorsVisible: 0
@@ -19,8 +19,12 @@ ScriptedImporter:
   _createLevelBoundsTrigger: 0
   _useParallax: 1
   _scaleEntities: 1
-  _intGridValues: []
-  _entities: []
+  _intGridValues:
+  - _key: GroundCollisions_1
+    _asset: {fileID: 11400000, guid: cbc629294da0d7544bbb52cc7cd85bdf, type: 2}
+  _entities:
+  - _key: PlayerSpawn
+    _asset: {instanceID: 0}
   _enumGenerate: 0
   _enumPath: 
   _enumNamespace: 

@@ -24,11 +24,19 @@ namespace DeadCells.Data
     [Serializable]
     public class WeaponStats
     {
+        public float Damage;
+        public float AttackSpeed;
+        public float Range;
         public float knockback;
         public float hitstunDuration;
         public int maxAmmo; // For ranged weapons
         public float reloadTime;
         public bool piercing;
         public int maxPierceCount;
+        
+        // 临时别名属性，保持向后兼容
+        public float damage { get => Damage; set => Damage = value; }
+        public float attackSpeed { get => AttackSpeed; set => AttackSpeed = value; }
+        public float range { get => Range; set => Range = value; }
     }
 }

@@ -81,7 +81,7 @@
 
 ### 环境要求
 
-- **Unity 2022.3.21f1 LTS** (推荐)
+- **Unity 2022.3.14f1 LTS** (推荐)
 - **Git** 和 **Git Bash** (Windows)
 - **LDtk** (用于关卡编辑)
 - **Visual Studio** 或 **JetBrains Rider** (推荐)

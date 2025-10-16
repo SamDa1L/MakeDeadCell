@@ -138,7 +138,7 @@ namespace DeadCells.Combat
                 range = 2.0f,
                 stats = new WeaponStats
                 {
-                    damage = 10,
+                    Damage = 10,
                     knockback = 5.0f,
                     hitstunDuration = 0.3f,
                     maxAmmo = 0,
