@@ -360,6 +360,13 @@ git checkout -- Packages/packages-lock.json
 
 > 目标：以 Unity Animator 与脚本状态机协同驱动玩家 Idle / Walk / Run / Jump / Fall / Crouch / CrouchWalk / Roll / Attack / Climb 等基础动作，同时为 Dash、Hurt 等扩展动作预留空间。
 
+**⚠️ 架构澄清**：
+本项目采用 **Animator 驱动的架构**，而非传统的脚本状态机。以下是核心职责分工：
+- **PlayerController**：采集输入 → 更新 Animator **Trigger** 参数（如 TryCrouch、Jump、Attack）
+- **Animator**：根据参数和转换条件自动管理状态切换
+- **StateMachineBehaviour (SMB)**：在状态进出时自动执行，维护状态相关的 **Bool** 参数（如 IsCrouching）和初始化/清理
+- **结果**：代码中不需要手动改动 Bool 参数（如 IsCrouching），完全由 SMB 自动维护
+
 #### 2.1 资源与目录结构
 - 【Unity 操作】确认动画剪辑已放置在 Assets/Animations/Player/MainCharacter/：
   - Player_Idle.anim
@@ -380,11 +387,29 @@ git checkout -- Packages/packages-lock.json
   1. Float Speed（默认 0，归一化水平速度：0=静止，≈0.4=行走，≈1=跑步）
   2. Float VerticalVelocity（默认 0，读取 Rigidbody2D.y）
   3. Bool IsGrounded（默认 true）
-  4. Bool IsCrouching（默认 false）
-  5. Bool IsClimbing（默认 false）
+  4. Bool IsCrouching（默认 false，由 StateMachineBehaviour 设置）
+  5. Bool IsClimbing（默认 false，由 StateMachineBehaviour 设置）
   6. Trigger Attack
   7. Trigger Roll
-  8. （可选）Trigger Hurt、Death
+  8. Trigger TryCrouch（✅ 新增：玩家按下 C 键时触发）
+  9. Trigger ReleaseCrouch（✅ 新增：玩家释放 C 键时触发）
+  10. （可选）Trigger Hurt、Death
+
+**参数更新说明**：
+- ✅ `TryCrouch` 和 `ReleaseCrouch` 由 PlayerController 的 `UpdateAnimatorParameters()` 方法驱动
+- ✅ `IsCrouching` Bool 参数**只由 StateMachineBehaviour 在进入/退出状态时设置**，不在 PlayerController 中设置
+
+**⚠️ 关键理解**：
+状态转换流程（以下蹲为例）：
+1. 按下 C 键 → PlayerController 调用 `animator.SetTrigger("TryCrouch")`
+2. Animator 根据转换条件 `TryCrouch` Trigger 从 Locomotion → Crouch
+3. 进入 Crouch 状态时，PlayerCrouchStateBehaviour.OnEnter() 自动执行
+4. SMB.OnEnter() 调用 `animator.SetBool("IsCrouching", true)` 和碰撞体调整
+5. 释放 C 键 → PlayerController 调用 `animator.SetTrigger("ReleaseCrouch")`
+6. Animator 根据 `ReleaseCrouch` Trigger 从 Crouch/CrouchWalk → Locomotion
+7. 退出状态时 SMB.OnExit() 自动执行，清理 IsCrouching 标志
+
+**注意**：代码中**不需要在 PlayerController 中手动改动 IsCrouching**，完全由 SMB 在状态进出时自动维护。
 
 #### 2.3 Grounded 子状态机（Idle / Walk / Run）
 - 【Unity 操作】在 Base Layer 新建子状态机 Grounded，将 Entry 连接到该子状态机。
@@ -397,11 +422,19 @@ git checkout -- Packages/packages-lock.json
 #### 2.4 下蹲与下蹲行走
 - 【Unity 操作】在 Grounded 内创建状态 Player_Crouch、Player_CrouchWalk，分别指定对应动画。
 - 配置转换：
-  - Grounded_Locomotion → Player_Crouch：Has Exit Time = false；条件：IsCrouching == true 且 Speed <= 0.1。
-  - Player_Crouch → Grounded_Locomotion：条件：IsCrouching == false。
-  - Player_Crouch → Player_CrouchWalk：条件：IsCrouching == true 且 Speed > 0.1。
-  - Player_CrouchWalk → Player_Crouch：条件：Speed <= 0.1。
-  - Player_CrouchWalk → Grounded_Locomotion：条件：IsCrouching == false。
+
+  | 转换 | 条件 | Has Exit Time | 说明 |
+  |---|---|---|---|
+  | **Grounded_Locomotion → Crouch** | `TryCrouch` Trigger | OFF | ✅ 使用 Trigger 而非 Bool，由玩家 C 键按下触发 |
+  | **Crouch → CrouchWalk** | `IsCrouching == true && Speed > 0.1` | OFF | 下蹲状态下有水平输入则转为行走 |
+  | **CrouchWalk → Crouch** | `IsCrouching == true && Speed <= 0.1` | OFF | 继续按住 C 键但停止移动时回到静止下蹲 |
+  | **Crouch → Grounded_Locomotion** | `ReleaseCrouch` Trigger | OFF | ✅ 玩家释放 C 键时触发 |
+  | **CrouchWalk → Grounded_Locomotion** | `ReleaseCrouch` Trigger | OFF | ✅ 玩家释放 C 键时触发 |
+
+**关键改进**：
+- ❌ **旧方式**（错误）：`Grounded_Locomotion → Crouch` 使用 `IsCrouching == true` Bool 判断
+- ✅ **新方式**（正确）：使用 `TryCrouch` Trigger 触发，由玩家 C 键输入驱动
+- ✅ **原则**：**输入触发状态转换，而不是判断状态本身**
 
 #### 2.5 翻滚与攻击
 - 【Unity 操作】在 Base Layer 添加 Any State → Player_Roll：Has Exit Time = false，条件触发器为 Roll。
@@ -569,11 +602,54 @@ amespace DeadCells.Player。
   - PlayerController 在 Inspector 中引用配置，状态通过 Context.Config 读取。
 
 #### 3.8 PlayerController 调整
-- 【Claude 实现】在 PlayerController 中新增：PlayerContext context、PlayerAnimatorBridge animatorBridge、PlayerStateMachine stateMachine。
-- Awake()：实例化 PlayerInput、context、nimatorBridge、stateMachine，调用 stateMachine.Initialize(PlayerStateId.Locomotion)。
-- Update()：依次 input.Update()、更新地面 / 攀爬检测、nimatorBridge.UpdateContinuousParameters()、stateMachine.Update()。
-- FixedUpdate()：stateMachine.FixedUpdate()。
-- 响应动画事件：实现 OnAttackComplete()、OnRollComplete() 调回适当状态。
+
+**现状架构**（Animator 驱动）：
+- PlayerController 采用基于 Animator 参数驱动的架构，**不再使用 StateMachine 状态类**
+- 职责分工：
+  - Update()：采集输入 → 更新 Animator 参数
+  - Animator：自动状态转换
+  - StateMachineBehaviour：状态初始化/清理
+  - FixedUpdate()：根据 Animator 当前状态转发物理处理
+
+**核心实现**：
+- 【✅ 已完成】在 PlayerController 中缓存 Animator 参数哈希值（状态和触发器）
+- 【✅ 已完成】在 UpdateAnimatorParameters() 方法中处理所有输入触发：
+  - `animator.SetTrigger("Jump")` - 跳跃输入
+  - `animator.SetTrigger("Attack")` - 攻击输入
+  - `animator.SetTrigger("Roll")` - 翻滚输入
+  - **`animator.SetTrigger("TryCrouch")` - 下蹲输入（C 键按下）**
+  - **`animator.SetTrigger("ReleaseCrouch")` - 下蹲释放（C 键释放）**
+- 【✅ 已完成】在 HandlePhysicsForCurrentState() 中根据 Animator 当前状态分派物理逻辑
+
+**下蹲输入处理流程**（新）：
+```csharp
+// PlayerController.cs UpdateAnimatorParameters() 中
+if (input.CrouchHeld)
+{
+    animator.SetTrigger(CROUCH_INPUT_TRIGGER);  // TryCrouch
+}
+else
+{
+    animator.SetTrigger(CROUCH_RELEASE_TRIGGER);  // ReleaseCrouch
+}
+
+// ⚠️ 注意：不在此处改动 IsCrouching Bool 参数
+// IsCrouching 完全由 StateMachineBehaviour 维护：
+// - PlayerCrouchStateBehaviour.OnEnter() → SetBool("IsCrouching", true)
+// - PlayerCrouchStateBehaviour.OnExit() → SetBool("IsCrouching", false)
+```
+
+**工作流程**：
+1. **Trigger 驱动初始转换**：`TryCrouch` 触发 Locomotion → Crouch 转换
+2. **SMB 自动执行**：Crouch 状态的 OnEnter() 自动调用，设置 IsCrouching = true
+3. **细粒度转换**：Crouch/CrouchWalk 之间的转换由 Speed 参数驱动
+4. **Trigger 驱动释放**：`ReleaseCrouch` 触发回到 Locomotion
+5. **SMB 自动清理**：Crouch 状态的 OnExit() 自动调用，清理 IsCrouching = false
+
+**关键原则**：
+- ✅ **输入驱动**：使用 Trigger 参数由用户输入直接触发状态转换
+- ✅ **状态管理**：Bool 参数（如 IsCrouching）仅由 StateMachineBehaviour 在状态进出时设置
+- ✅ **物理分派**：每种状态有对应的 Handle*Physics() 方法处理物理逻辑
 
 #### 3.9 测试与验证
 - 【Claude 实现】可在 Assets/Scripts/DeadCells.Player/Tests/ 编写 EditMode 测试：
@@ -581,7 +657,9 @@ amespace DeadCells.Player。
   - 使用虚拟 Animator 或桥接类断言参数更新是否正确。
 - 【Unity 操作】在场景中实测：
   - Idle → Walk → Run 时 Speed 连续变化，动画 Blend Tree 工作正常。
-  - 按下下蹲键 IsCrouching 变为 true，动画切换为下蹲 / 下蹲移动。
+  - **按下 C 键**：TryCrouch Trigger 触发 → 角色进入 Crouch 状态 → IsCrouching 变为 true。
+  - **继续按 C 键并有水平输入**：Crouch → CrouchWalk 状态转换。
+  - **释放 C 键**：ReleaseCrouch Trigger 触发 → 返回 Idle/Walk/Run 状态。
   - 触发 Attack / Roll，动画播放完毕后能回到正确状态。
   - 进入可攀爬区域时 IsClimbing 为 true，退出后恢复原状态。
 
@@ -813,6 +891,21 @@ public class PlayerController : MonoBehaviour
 - **问题 3：Animator 转换条件不完整**
   - 症状：在地面上触发跳跃动画
   - 解决：跳跃应通过脚本输入检测实现，参见阶段 2.4 的输入驱动逻辑
+
+**下蹲不工作或无法进入 Crouch 状态**：
+- **可能原因 1：缺少 TryCrouch/ReleaseCrouch Trigger 参数**
+  - 检查 Animator Controller Parameters 中是否添加了这两个 Trigger
+  - 参见阶段 2.2 的 Animator 参数说明
+- **可能原因 2：Animator 转换条件配置错误**
+  - ✅ 正确：`Grounded_Locomotion → Crouch` 的条件为 `TryCrouch` Trigger
+  - ❌ 错误：使用 `IsCrouching == true` Bool 条件（这是状态的结果，不是原因）
+  - 验证方法：在 Animator 窗口中打开转换，查看转换条件
+- **可能原因 3：PlayerController 中未处理下蹲输入**
+  - 检查 `UpdateAnimatorParameters()` 中是否调用了 `SetTrigger(CROUCH_INPUT_TRIGGER)` 和 `SetTrigger(CROUCH_RELEASE_TRIGGER)`
+  - 参见阶段 3.8 的下蹲输入处理流程
+- **可能原因 4：C 键按键绑定未设置或不正确**
+  - 检查 `PlayerInput.cs` 中第 56 行是否为 `Input.GetKey(KeyCode.C)`
+  - 验证方法：在 PlayerInput.Update() 中添加调试日志输出 `input.CrouchHeld` 的值
 
 **状态机与动画不同步**：
 - **症状**：角色状态已切换到 Jump，但动画仍播放 Idle

@@ -44,20 +44,24 @@ namespace DeadCells.Player
         private float jumpBufferCounter;
         private bool facingRight = true;
 
-        // 缓存Animator状态哈希值，使用完整路径哈希以避免名称碰撞
-        // ⚠️ 重要：使用 fullPathHash 而非 nameHash，确保在不同子状态机中的同名状态也能正确区分
-        // 完整路径格式：[Layer].[SubStateMachine].[State] 或 [Layer].[State]
-        // ⚠️ LOCOMOTION_HASH 必须指向 Blend Tree，而非子状态机
-        // Grounded_Locomotion 是子状态机，Locomotion_Blend 是其内的 Blend Tree（实际活跃状态）
-        private static readonly int LOCOMOTION_HASH = Animator.StringToHash("Base Layer.Grounded_Locomotion.Locomotion_Blend");
-        private static readonly int CROUCH_HASH = Animator.StringToHash("Base Layer.Crouch");
-        private static readonly int CROUCH_WALK_HASH = Animator.StringToHash("Base Layer.CrouchWalk");
-        private static readonly int JUMP_HASH = Animator.StringToHash("Base Layer.Jump");
-        private static readonly int FALL_HASH = Animator.StringToHash("Base Layer.Fall");
-        private static readonly int ATTACK_HASH = Animator.StringToHash("Base Layer.Attack");
-        private static readonly int ROLL_HASH = Animator.StringToHash("Base Layer.Roll");
-        private static readonly int CLIMB_IDLE_HASH = Animator.StringToHash("Base Layer.ClimbIdle");
-        private static readonly int CLIMB_MOVE_HASH = Animator.StringToHash("Base Layer.ClimbMove");
+        // 缓存 Animator 状态哈希值（平层架构）
+        // ⚠️ 重要：所有状态都在 Base Layer 顶层，使用 shortNameHash
+        // 格式：简单状态名称
+        private static readonly int IDLE_HASH = Animator.StringToHash("Idle");
+        private static readonly int WALK_HASH = Animator.StringToHash("Walk");
+        private static readonly int RUN_HASH = Animator.StringToHash("Run");
+        private static readonly int CROUCH_HASH = Animator.StringToHash("Crouch");
+        private static readonly int CROUCH_WALK_HASH = Animator.StringToHash("CrouchWalk");
+        private static readonly int JUMP_HASH = Animator.StringToHash("Jump");
+        private static readonly int FALL_HASH = Animator.StringToHash("Fall");
+        private static readonly int ATTACK_HASH = Animator.StringToHash("Attack");
+        private static readonly int ROLL_HASH = Animator.StringToHash("Roll");
+        private static readonly int CLIMB_IDLE_HASH = Animator.StringToHash("ClimbIdle");
+        private static readonly int CLIMB_MOVE_HASH = Animator.StringToHash("ClimbMove");
+
+        // 缓存 Animator 触发器参数哈希值
+        private static readonly int CROUCH_INPUT_TRIGGER = Animator.StringToHash("TryCrouch");
+        private static readonly int CROUCH_RELEASE_TRIGGER = Animator.StringToHash("ReleaseCrouch");
 
         #region 公开属性访问器
 
@@ -253,6 +257,22 @@ namespace DeadCells.Player
                 animator.SetTrigger("Roll");
             }
 
+            // 处理下蹲输入
+            // ✅ 使用沿处理：仅在按下/松开时触发Trigger，避免每帧重复触发
+            // TryCrouch：玩家按下C键时触发（GetKeyDown）
+            // ReleaseCrouch：玩家松开C键时触发（GetKeyUp）
+            if (input.CrouchPressed)
+            {
+                // 只在按下瞬间触发一次
+                animator.SetTrigger(CROUCH_INPUT_TRIGGER);
+            }
+
+            if (input.CrouchReleased)
+            {
+                // 只在松开瞬间触发一次
+                animator.SetTrigger(CROUCH_RELEASE_TRIGGER);
+            }
+
             // ⚠️ IsCrouching 和 IsClimbing 由对应的StateMachineBehaviour设置
             // 不在此处设置
         }
@@ -267,56 +287,43 @@ namespace DeadCells.Player
         /// </summary>
         private void HandlePhysicsForCurrentState()
         {
-            // 获取当前Animator状态信息
+            // 获取当前Animator状态信息（平层架构，所有状态都在顶层）
             AnimatorStateInfo currentState = animator.GetCurrentAnimatorStateInfo(0);
-            // 使用 fullPathHash 包含完整的状态路径
-            int currentStateHash = currentState.fullPathHash;
+            // 使用 shortNameHash 因为所有状态名称在顶层是唯一的
+            int currentStateHash = currentState.shortNameHash;
 
-            // 检查是否正在转换，并获取下一个状态
-            int nextStateHash = currentStateHash;
-            if (animator.IsInTransition(0))
-            {
-                AnimatorStateInfo nextState = animator.GetNextAnimatorStateInfo(0);
-                // 过渡期间优先使用目标状态的物理处理，确保状态切换时不出现帧延迟
-                // 使用 fullPathHash 获取完整路径
-                nextStateHash = nextState.fullPathHash;
-            }
-
-            // 使用目标状态哈希进行转发（过渡期间用下一个状态，否则用当前状态）
-            int stateHashToUse = animator.IsInTransition(0) ? nextStateHash : currentStateHash;
-
-            // 优先级转发（按照优先级从高到低检查）
-            if (stateHashToUse == JUMP_HASH)
+            // 按优先级检查状态
+            if (currentStateHash == JUMP_HASH)
             {
                 HandleJumpPhysics();
             }
-            else if (stateHashToUse == FALL_HASH)
+            else if (currentStateHash == FALL_HASH)
             {
                 HandleFallPhysics();
             }
-            else if (stateHashToUse == ATTACK_HASH)
+            else if (currentStateHash == ATTACK_HASH)
             {
                 HandleAttackPhysics();
             }
-            else if (stateHashToUse == ROLL_HASH)
+            else if (currentStateHash == ROLL_HASH)
             {
                 HandleRollPhysics();
             }
-            else if (stateHashToUse == CROUCH_HASH)
+            else if (currentStateHash == CROUCH_HASH)
             {
                 HandleCrouchPhysics();
             }
-            else if (stateHashToUse == CROUCH_WALK_HASH)
+            else if (currentStateHash == CROUCH_WALK_HASH)
             {
                 HandleCrouchWalkPhysics();
             }
-            else if (stateHashToUse == CLIMB_IDLE_HASH || stateHashToUse == CLIMB_MOVE_HASH)
+            else if (currentStateHash == CLIMB_IDLE_HASH || currentStateHash == CLIMB_MOVE_HASH)
             {
-                HandleClimbPhysics(stateHashToUse == CLIMB_MOVE_HASH);
+                HandleClimbPhysics(currentStateHash == CLIMB_MOVE_HASH);
             }
-            else if (stateHashToUse == LOCOMOTION_HASH)
+            else if (currentStateHash == IDLE_HASH || currentStateHash == WALK_HASH || currentStateHash == RUN_HASH)
             {
-                HandleLocomotionPhysics();
+                HandleLocomotionPhysics();  // 处理所有地面移动状态
             }
         }
 
@@ -351,12 +358,24 @@ namespace DeadCells.Player
 
         /// <summary>
         /// 下蹲状态物理处理
-        /// 保持静止，不允许移动
+        /// 不按方向键时保持静止，按方向键时以下蹲速度移动（触发到CrouchWalk转换）
         /// </summary>
         private void HandleCrouchPhysics()
         {
-            // 下蹲时清零水平速度，保持静止
-            physicsController.SetHorizontalVelocity(0);
+            float moveDirection = input.Horizontal;
+
+            if (Mathf.Abs(moveDirection) < 0.01f)
+            {
+                // 没有水平输入：保持静止
+                physicsController.SetHorizontalVelocity(0f);
+            }
+            else
+            {
+                // 有水平输入：应用下蹲移动速度
+                // 这会让 Speed 参数升高，满足 Crouch → CrouchWalk 的转换条件（IsCrouching && Speed > 0.1）
+                physicsController.SetHorizontalVelocity(
+                    moveDirection * movementConfig.CrouchSpeed);
+            }
         }
 
         /// <summary>

@@ -18,6 +18,8 @@ namespace DeadCells.Player
         private bool attackPressed;
         private bool rollPressed;
         private bool crouchHeld;
+        private bool crouchPressed;
+        private bool crouchReleased;
         #endregion
 
         #region Climbing Input
@@ -35,6 +37,8 @@ namespace DeadCells.Player
         public bool RollPressed => rollPressed;
 
         public bool CrouchHeld => crouchHeld;
+        public bool CrouchPressed => crouchPressed;
+        public bool CrouchReleased => crouchReleased;
 
         public float ClimbAxis => climbAxis;
         public bool ClimbHeld => climbHeld;
@@ -54,6 +58,8 @@ namespace DeadCells.Player
             attackPressed = Input.GetMouseButtonDown(0);
             rollPressed = Input.GetKeyDown(KeyCode.LeftShift);
             crouchHeld = Input.GetKey(KeyCode.C);
+            crouchPressed = Input.GetKeyDown(KeyCode.C);
+            crouchReleased = Input.GetKeyUp(KeyCode.C);
 
             // Climbing (using vertical axis)
             climbAxis = Input.GetAxisRaw("Vertical");
